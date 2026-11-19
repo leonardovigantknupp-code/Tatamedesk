@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220"><meta name="description" content="TatameDesk - agenda pessoal e operacional">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg">
+<title>TatameDesk</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-mark">TD</div><div><strong>TatameDesk</strong><small>Agenda do professor</small></div></div>
+  <nav><button class="nav active" data-view="today">◷ <span>Hoje</span></button><button class="nav" data-view="calendar">▦ <span>Calendário</span></button><button class="nav" data-view="tasks">✓ <span>Tarefas</span></button><button class="nav" data-view="classes">🥋 <span>Turmas</span></button></nav>
+  <div class="sidebar-bottom"><span class="status-dot"></span> Seus dados ficam neste dispositivo</div>
+</aside>
+<main class="main">
+<header class="topbar"><div><p class="eyebrow">PAINEL DO PROFESSOR</p><h1 id="page-title">Hoje</h1></div><button class="primary" id="add-event">＋ Novo compromisso</button></header>
+<section id="view-today" class="view">
+ <div class="welcome"><div><p class="eyebrow">SUA ROTINA</p><h2 id="today-date">Organize seu dia.</h2><p class="muted">Compromissos e tarefas em um só lugar.</p></div><div class="date-chip" id="today-chip"></div></div>
+ <div class="stats"><article><span>Compromissos hoje</span><b id="stat-events">0</b></article><article><span>Tarefas pendentes</span><b id="stat-tasks">0</b></article><article><span>Turmas cadastradas</span><b id="stat-classes">0</b></article></div>
+ <div class="section-head"><div><p class="eyebrow">PROGRAMAÇÃO</p><h2>Próximos compromissos</h2></div><button class="text-btn" data-goto="calendar">Ver calendário →</button></div>
+ <div id="today-list" class="event-list"></div>
+ <div class="section-head"><div><p class="eyebrow">PARA NÃO ESQUECER</p><h2>Tarefas pendentes</h2></div><button class="text-btn" data-goto="tasks">Ver tarefas →</button></div><div id="today-tasks" class="task-list"></div>
+</section>
+<section id="view-calendar" class="view hidden">
+ <div class="calendar-toolbar"><button class="icon-btn" id="prev-month">‹</button><h2 id="month-label"></h2><button class="icon-btn" id="next-month">›</button><div class="spacer"></div><button class="secondary" id="month-mode">Mês</button><button class="secondary" id="week-mode">Semana</button></div>
+ <div class="calendar-grid" id="calendar-grid"></div><div class="section-head"><div><p class="eyebrow">DATA SELECIONADA</p><h2 id="selected-label">Compromissos</h2></div><button class="primary small" id="add-selected">＋ Adicionar</button></div><div id="selected-list" class="event-list"></div>
+</section>
+<section id="view-tasks" class="view hidden"><div class="section-head"><div><p class="eyebrow">ORGANIZAÇÃO</p><h2>Minhas tarefas</h2></div><button class="primary" id="add-task">＋ Nova tarefa</button></div><div id="all-tasks" class="task-list"></div></section>
+<section id="view-classes" class="view hidden"><div class="section-head"><div><p class="eyebrow">HORÁRIOS DE TREINO</p><h2>Minhas turmas</h2></div><button class="primary" id="add-class">＋ Nova turma</button></div><p class="muted intro">Comece com a Turma 01 e crie outras com os nomes que desejar.</p><div id="class-list" class="class-grid"></div></section>
+<footer> TATAMEDESK <span>•</span> Evoluindo junto com sua academia</footer>
+</main></div>
+<dialog id="event-dialog"><form method="dialog" id="event-form"><div class="modal-head"><div><p class="eyebrow">AGENDA</p><h2 id="event-modal-title">Novo compromisso</h2></div><button class="icon-btn close" value="cancel">×</button></div>
+<input type="hidden" id="event-id"><label>Título<input id="event-title" required maxlength="90" placeholder="Ex.: Aula de Jiu-Jitsu"></label>
+<label>Descrição / observações<textarea id="event-desc" rows="2" placeholder="Detalhes (opcional)"></textarea></label>
+<div class="form-row"><label>Data<input id="event-date" type="date" required></label><label>Categoria<select id="event-category"><option>Aula</option><option>Reunião</option><option>Pessoal</option><option>Tarefa</option><option>Outro</option></select></label></div>
+<div class="form-row"><label>Início<input id="event-start" type="time" value="08:00" required></label><label>Término<input id="event-end" type="time" value="09:00"></label></div>
+<div class="form-row"><label>Prioridade<select id="event-priority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></label><label>Lembrete<select id="event-reminder"><option value="0">Sem lembrete</option><option value="10">10 minutos antes</option><option value="30">30 minutos antes</option><option value="60">1 hora antes</option><option value="1440" selected>1 dia antes</option></select></label></div>
+<div class="modal-actions"><button type="button" class="danger hidden" id="delete-event">Excluir</button><span class="spacer"></span><button class="secondary" value="cancel">Cancelar</button><button class="primary" id="save-event" value="default">Salvar</button></div></form></dialog>
+<dialog id="task-dialog"><form method="dialog" id="task-form"><div class="modal-head"><h2>Nova tarefa</h2><button class="icon-btn close" value="cancel">×</button></div><label>Descrição<input id="task-title" required placeholder="O que precisa fazer?"></label><label>Prazo<input id="task-date" type="date"></label><div class="modal-actions"><span class="spacer"></span><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Adicionar</button></div></form></dialog>
+<dialog id="class-dialog"><form method="dialog" id="class-form"><div class="modal-head"><h2>Nova turma</h2><button class="icon-btn close" value="cancel">×</button></div><label>Nome da turma<input id="class-name" required placeholder="Ex.: Turma 01"></label><label>Professor responsável<input id="class-teacher" placeholder="Nome do professor"></label><label>Local<input id="class-place" placeholder="Ex.: Tatame principal"></label><label>Dias da semana<select id="class-days" multiple size="7"><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select><small class="hint">Use Ctrl (ou toque) para selecionar mais de um dia.</small></label><div class="form-row"><label>Início<input id="class-start" type="time" value="19:00"></label><label>Término<input id="class-end" type="time" value="20:00"></label></div><div class="modal-actions"><span class="spacer"></span><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Salvar turma</button></div></form></dialog>
+<div class="toast" id="toast"></div><script src="app.js"></script>
+</body></html>
