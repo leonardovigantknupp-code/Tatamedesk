@@ -93,7 +93,16 @@ case 'pay-private':{const s=data.privateStudents.find(x=>x.id===id);if(s)payment
 case 'prev-month':calendarDate.setMonth(calendarDate.getMonth()-1);renderCalendar();break;case 'next-month':calendarDate.setMonth(calendarDate.getMonth()+1);renderCalendar();break;
 case 'select-date':selectedDate=el.dataset.date;renderCalendar();break;
 case 'share-class':{const c=data.classes.find(x=>x.id===id);if(c)shareText(classSummary(c));break}
-case 'share-finance':{const m=$('#finance-month').value||monthNow();const s=allFinancialStudents();const text='TATAMEDESK — RESUMO FINANCEIRO — '+monthLabel(m)+'\n'+s.map(x=>x.name+' | '+money(expectedForStudent(x,m))+' previsto | '+money(paidForStudent(x,m))+' recebido | '+money(Math.max(0,expectedForStudent(x,m)-paidForStudent(x,m)))+' pendente').join('\n');shareText(text);break}
+case 'share-finance':{
+ const m=$('#finance-month').value||monthNow(),s=allFinancialStudents();
+ const expected=s.reduce((n,x)=>n+expectedForStudent(x,m),0),received=s.reduce((n,x)=>n+paidForStudent(x,m),0),pending=s.reduce((n,x)=>n+Math.max(0,expectedForStudent(x,m)-paidForStudent(x,m)),0);
+ let academy=0;
+ s.forEach(x=>{const paid=paidForStudent(x,m);if(x.source==='class'){const c=x.classObj;academy+=c.financeModel==='perLesson'?Number(x.lessonsByMonth?.[m]||0)*Number(c.academyRate||0):paid*Number(c.academyPercent??60)/100}else academy+=data.privatePayments.filter(p=>p.studentId===x.id&&p.month===m).length*Number(x.academyRate??data.settings.privateAcademyRate??10)});
+ const lines=s.map(x=>x.name+' | '+money(expectedForStudent(x,m))+' previsto | '+money(paidForStudent(x,m))+' recebido | '+money(Math.max(0,expectedForStudent(x,m)-paidForStudent(x,m)))+' pendente');
+ const classes=data.classes.map(c=>{const got=(c.payments||[]).filter(p=>p.month===m).reduce((n,p)=>n+Number(p.amount||0),0);return c.name+': recebido '+money(got)+' | academia '+(c.financeModel==='perLesson'?'taxa por aula':Number(c.academyPercent??60)+'%')});
+ const text='TATAMEDESK — RESUMO FINANCEIRO — '+monthLabel(m)+'\\n\\n'+lines.join('\\n')+'\\n\\n'+classes.join('\\n')+'\\n\\nTOTAL PREVISTO: '+money(expected)+'\\nTOTAL RECEBIDO: '+money(received)+'\\nTOTAL PENDENTE: '+money(pending)+'\\nREPASSE ACADEMIA: '+money(academy)+'\\nPARTE DO PROFESSOR: '+money(received-academy);
+ shareText(text);break
+}
 case 'copy-summary':{const t=$('#share-output');if(t){t.select();document.execCommand('copy');notify('Resumo copiado.')}break}
 }}
 document.addEventListener('click',e=>{const nav=e.target.closest('[data-view]');if(nav){go(nav.dataset.view);return}const btn=e.target.closest('[data-action]');if(btn){handleAction(btn.dataset.action,btn);return}});
