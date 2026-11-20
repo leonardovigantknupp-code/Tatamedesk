@@ -124,7 +124,23 @@ async function copyShareText(value){
  alert(value);return false;
 }
 $('#share-finance').onclick=async()=>{
- let m=currentMonth(),lines=students.map(s=>{let paid=paidFor(s.id,m),pct=groupPercent(s),academy=academyFor(s,m);return s.name+': previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | '+(s.type==='particular'?'aulas '+lessonsFor(s,m)+' | repasse academia '+money(academy):'academia '+pct+'% ('+money(academy)+')')});classes.forEach(c=>(c.students||[]).forEach(s=>{let paid=classPaid(c,s.id,m),academy=c.financeModel==='perLesson'?Number(s.lessonsByMonth?.[m]||0)*Number(c.academyRate||0):paid*Number(c.academyPercent??60)/100;lines.push(s.name+' ('+c.name+'): previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | repasse academia '+money(academy))}));let total=students.reduce((a,s)=>a+academyFor(s,m),0)+classes.reduce((a,c)=>a+classAcademy(c,m),0),received=payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount),0)+classes.reduce((a,c)=>a+(c.payments||[]).filter(p=>p.month===m).reduce((b,p)=>b+Number(p.amount),0),0),msg='TATAMEDESK — RESUMO FINANCEIRO '+m+'\n\n'+lines.join('\n')+'\n\nTotal recebido: '+money(received)+'\nRepasse da academia: '+money(total)+'\nParte do professor: '+money(received-total);
+ let m=currentMonth(),lines=students.map(s=>{
+  let paid=paidFor(s.id,m),pct=groupPercent(s),academy=academyFor(s,m);
+  if(s.type==='particular')return s.name+': previsto XXX | recebido XXX | pendente XXX | aulas realizadas '+lessonsFor(s,m)+' × '+money(10)+' = repasse academia '+money(academy);
+  return s.name+': previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | academia '+pct+'% ('+money(academy)+')';
+ });
+ classes.forEach(c=>(c.students||[]).forEach(s=>{
+  let paid=classPaid(c,s.id,m),lessons=Number(s.lessonsByMonth?.[m]||0);
+  if(c.financeModel==='perLesson'){
+   let rate=Number(c.academyRate||0),academy=lessons*rate;
+   lines.push(s.name+' ('+c.name+'): previsto XXX | recebido XXX | pendente XXX | aulas realizadas '+lessons+' × '+money(rate)+' = repasse academia '+money(academy));
+  }else{
+   let academy=paid*Number(c.academyPercent??60)/100;
+   lines.push(s.name+' ('+c.name+'): previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | repasse academia '+money(academy));
+  }
+ }));
+ let total=students.reduce((a,s)=>a+academyFor(s,m),0)+classes.reduce((a,c)=>a+classAcademy(c,m),0);
+ let msg='TATAMEDESK — RESUMO FINANCEIRO '+m+'\\n\\n'+lines.join('\\n')+'\\n\\nRepasse total da academia: '+money(total);
  if(navigator.share){try{await navigator.share({title:'Resumo financeiro TatameDesk',text:msg});return;}catch(error){if(error?.name==='AbortError')return;}}
  await copyShareText(msg);
 };
@@ -152,7 +168,25 @@ $('#delete-class-student').onclick=()=>{let c=classes.find(x=>x.id===activeClass
 window.payClassStudent=id=>{let c=classes.find(x=>x.id===activeClassId),s=c?.students?.find(x=>x.id===id);if(!s)return;$('#class-payment-form').reset();$('#class-payment-student').value=id;$('#class-payment-name').value=s.name;$('#class-payment-amount').value=Math.max(0,Number(s.amount)-classPayments(c,id,detailMonth())).toFixed(2);$('#class-payment-date').value=todayISO();$('#class-payment-dialog').showModal()};
 $('#class-payment-form').onsubmit=e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();let c=classes.find(x=>x.id===activeClassId),date=$('#class-payment-date').value;if(!c)return;c.payments=c.payments||[];c.payments.push({id:crypto.randomUUID(),studentId:$('#class-payment-student').value,amount:Number($('#class-payment-amount').value),date,month:date.slice(0,7)});save();$('#class-payment-dialog').close();renderClassDetail();renderClasses();renderFinance();toast('Pagamento registrado')};
 window.setStudentLessons=(id,value)=>{let c=classes.find(x=>x.id===activeClassId),s=c?.students?.find(x=>x.id===id);if(!s)return;s.lessonsByMonth=s.lessonsByMonth||{};s.lessonsByMonth[detailMonth()]=Math.max(0,Number(value)||0);save();renderClassDetail();renderFinance()};
-$('#share-class').onclick=async()=>{let c=classes.find(x=>x.id===activeClassId);if(!c)return;let m=detailMonth(),received=c.payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount),0),academy=c.financeModel==='perLesson'?c.students.reduce((a,s)=>a+Number(s.lessonsByMonth?.[m]||0)*Number(c.academyRate||0),0):received*Number(c.academyPercent??60)/100,teacher=received-academy,rows=c.students.map(s=>{let paid=classPayments(c,s.id,m),due=Math.max(0,Number(s.amount)-paid);return s.name+' — mensalidade '+brl(s.amount)+' | recebido '+brl(paid)+' | pendente '+brl(due)+(c.financeModel==='perLesson'?' | aulas '+Number(s.lessonsByMonth?.[m]||0)+' | academia '+brl(Number(s.lessonsByMonth?.[m]||0)*Number(c.academyRate||0)):'')});let msg='TATAMEDESK — '+c.name+' — '+m+'\\n'+rows.join('\\n')+'\\n\\nPrevisto: '+brl(c.students.reduce((a,s)=>a+Number(s.amount||0),0))+'\\nRecebido: '+brl(received)+'\\nPendente: '+brl(c.students.reduce((a,s)=>a+Math.max(0,Number(s.amount)-classPayments(c,s.id,m)),0))+'\\nRepasse academia: '+brl(academy)+'\\nProfessor: '+brl(teacher);if(navigator.share){try{await navigator.share({title:'Fechamento '+c.name,text:msg});return;}catch(error){if(error?.name==='AbortError')return;}}await copyShareText(msg)};
+$('#share-class').onclick=async()=>{
+ let c=classes.find(x=>x.id===activeClassId);if(!c)return;
+ let m=detailMonth(),received=c.payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount),0);
+ let academy=c.financeModel==='perLesson'?c.students.reduce((a,s)=>a+Number(s.lessonsByMonth?.[m]||0)*Number(c.academyRate||0),0):received*Number(c.academyPercent??60)/100;
+ let rows=c.students.map(s=>{
+  let lessons=Number(s.lessonsByMonth?.[m]||0);
+  if(c.financeModel==='perLesson'){
+   let rate=Number(c.academyRate||0),transfer=lessons*rate;
+   return s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas realizadas × '+brl(rate)+' = repasse '+brl(transfer);
+  }
+  let paid=classPayments(c,s.id,m),due=Math.max(0,Number(s.amount)-paid);
+  return s.name+' — mensalidade '+brl(s.amount)+' | recebido '+brl(paid)+' | pendente '+brl(due);
+ });
+ let msg='TATAMEDESK — '+c.name+' — '+m+'\\n'+rows.join('\\n')+'\\n\\n';
+ if(c.financeModel==='perLesson')msg+='Repasse da academia: '+brl(academy);
+ else msg+='Previsto: '+brl(c.students.reduce((a,s)=>a+Number(s.amount||0),0))+'\\nRecebido: '+brl(received)+'\\nPendente: '+brl(c.students.reduce((a,s)=>a+Math.max(0,Number(s.amount)-classPayments(c,s.id,m)),0))+'\\nRepasse academia: '+brl(academy)+'\\nProfessor: '+brl(received-academy);
+ if(navigator.share){try{await navigator.share({title:'Fechamento '+c.name,text:msg});return;}catch(error){if(error?.name==='AbortError')return;}}
+ await copyShareText(msg);
+};
 
 // Inicializa somente depois de registrar todos os componentes e eventos.
 render();
