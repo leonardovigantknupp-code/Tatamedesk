@@ -57,8 +57,6 @@ $('#group-form').onsubmit=e=>{e.preventDefault();let id=$('#group-form').dataset
 window.editGroup=id=>{let g=groups.find(x=>x.id===id);if(!g)return;$('#group-name').value=g.name;$('#group-percent').value=g.percent;$('#group-form').dataset.edit=id;$('#group-dialog').showModal()};
 $('#share-finance').onclick=()=>{let m=currentMonth(),lines=students.map(s=>{let paid=paidFor(s.id,m),pct=groupPercent(s);return s.name+': previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | academia '+pct+'% ('+money(paid*pct/100)+')'}),total=students.reduce((a,s)=>a+paidFor(s.id,m)*groupPercent(s)/100,0),received=payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount),0),text='TATAMEDESK — RESUMO FINANCEIRO '+m+'\\n\\n'+lines.join('\\n')+'\\n\\nTotal recebido: '+money(received)+'\\nRepasse da academia: '+money(total)+'\\nParte do professor: '+money(received-total);if(navigator.share)navigator.share({title:'Resumo financeiro TatameDesk',text}).catch(()=>{});else if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>toast('Resumo copiado para compartilhar'));else alert(text)};
 
-render();
-
 let activeClassId=null;
 window.editClass=id=>{let c=classes.find(x=>x.id===id);if(c)openClassEditor(c)};
 const detailMonth=()=>$('#detail-month').value||todayISO().slice(0,7);
