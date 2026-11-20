@@ -16,7 +16,7 @@ function migrate(){
  if(old){
   old.privateStudents=Array.isArray(old.privateStudents)?old.privateStudents:[];
   old.privatePayments=Array.isArray(old.privatePayments)?old.privatePayments:[];
-  if(!Array.isArray(old.privateLessons)){
+  if(!Array.isArray(old.privateLessons)||(old.privateLessons.length===0&&old.privatePayments.length>0)){
    old.privateLessons=old.privatePayments.map(p=>({...p,id:p.lessonId||p.id||uid(),date:p.date||today(),month:p.month||(p.date||today()).slice(0,7),paid:true}));
   }
   old.settings=old.settings||{privateAcademyRate:10};
