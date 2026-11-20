@@ -100,7 +100,7 @@ case 'share-finance':{
  s.forEach(x=>{const paid=paidForStudent(x,m);if(x.source==='class'){const c=x.classObj;academy+=c.financeModel==='perLesson'?Number(x.lessonsByMonth?.[m]||0)*Number(c.academyRate||0):paid*Number(c.academyPercent??60)/100}else academy+=data.privatePayments.filter(p=>p.studentId===x.id&&p.month===m).length*Number(x.academyRate??data.settings.privateAcademyRate??10)});
  const lines=s.map(x=>x.name+' | '+money(expectedForStudent(x,m))+' previsto | '+money(paidForStudent(x,m))+' recebido | '+money(Math.max(0,expectedForStudent(x,m)-paidForStudent(x,m)))+' pendente');
  const classes=data.classes.map(c=>{const got=(c.payments||[]).filter(p=>p.month===m).reduce((n,p)=>n+Number(p.amount||0),0);return c.name+': recebido '+money(got)+' | academia '+(c.financeModel==='perLesson'?'taxa por aula':Number(c.academyPercent??60)+'%')});
- const text='TATAMEDESK — RESUMO FINANCEIRO — '+monthLabel(m)+'\\n\\n'+lines.join('\\n')+'\\n\\n'+classes.join('\\n')+'\\n\\nTOTAL PREVISTO: '+money(expected)+'\\nTOTAL RECEBIDO: '+money(received)+'\\nTOTAL PENDENTE: '+money(pending)+'\\nREPASSE ACADEMIA: '+money(academy)+'\\nPARTE DO PROFESSOR: '+money(received-academy);
+ const text='TATAMEDESK — RESUMO FINANCEIRO — '+monthLabel(m)+'\n\n'+lines.join('\n')+'\n\n'+classes.join('\n')+'\n\nTOTAL PREVISTO: '+money(expected)+'\nTOTAL RECEBIDO: '+money(received)+'\nTOTAL PENDENTE: '+money(pending)+'\nREPASSE ACADEMIA: '+money(academy)+'\nPARTE DO PROFESSOR: '+money(received-academy);
  shareText(text);break
 }
 case 'copy-summary':{const t=$('#share-output');if(t){t.select();document.execCommand('copy');notify('Resumo copiado.')}break}
