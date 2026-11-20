@@ -24,12 +24,13 @@ if(!Array.isArray(data.tasks))data.tasks=[];
 if(!Array.isArray(data.classes))data.classes=[];
 if(!Array.isArray(data.privateStudents))data.privateStudents=[];
 if(!Array.isArray(data.privatePayments))data.privatePayments=[];
+if(!Array.isArray(data.privateLessons))data.privateLessons=[];
 if(!Array.isArray(data.groups))data.groups=[];
 data.settings=data.settings||{privateAcademyRate:10};
 function save(){try{localStorage.setItem('td_v2_data',JSON.stringify(data));localStorage.setItem('td_events',JSON.stringify(data.events));localStorage.setItem('td_tasks',JSON.stringify(data.tasks));localStorage.setItem('td_classes',JSON.stringify(data.classes));localStorage.setItem('td_students',JSON.stringify(data.privateStudents));localStorage.setItem('td_payments',JSON.stringify(data.privatePayments));localStorage.setItem('td_groups',JSON.stringify(data.groups));return true}catch(e){notify('Não foi possível salvar. Verifique o espaço do navegador.');return false}}
 function notify(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>el.classList.remove('show'),2600)}
 function go(v){if(!$('#view-'+v))return;view=v;$$('.view').forEach(x=>x.classList.toggle('hidden',x.id!=='view-'+v));$$('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===v));$('#page-title').textContent=({today:'Hoje',calendar:'Calendário',tasks:'Tarefas',classes:'Turmas',private:'Aulas individuais',finance:'Financeiro'})[v]||'TatameDesk';render()}
-function openModal(title,html){$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;$('#modal').showModal()}
+function openModal(title,html){if($('#modal').open)$('#modal').close();$('#modal-title').textContent=title;$('#modal-body').innerHTML=html;$('#modal').showModal()}
 function closeModal(){$('#modal').close();$('#modal-body').innerHTML=''}
 function field(label,id,value='',type='text',extra=''){return '<label>'+label+'<input id="'+id+'" type="'+type+'" value="'+esc(value)+'" '+extra+'></label>'}
 function selectField(label,id,options,value){return '<label>'+label+'<select id="'+id+'">'+options.map(o=>'<option value="'+esc(o.value)+'" '+(o.value===value?'selected':'')+'>'+esc(o.label)+'</option>').join('')+'</select></label>'}
