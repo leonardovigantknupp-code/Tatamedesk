@@ -124,23 +124,44 @@ async function copyShareText(value){
  alert(value);return false;
 }
 $('#share-finance').onclick=async()=>{
- let m=currentMonth(),lines=students.map(s=>{
-  let paid=paidFor(s.id,m),pct=groupPercent(s),academy=academyFor(s,m);
-  if(s.type==='particular')return s.name+': previsto XXX | recebido XXX | pendente XXX | aulas realizadas '+lessonsFor(s,m)+' × '+money(10)+' = repasse academia '+money(academy);
-  return s.name+': previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | academia '+pct+'% ('+money(academy)+')';
- });
- classes.forEach(c=>(c.students||[]).forEach(s=>{
-  let paid=classPaid(c,s.id,m),lessons=Number(s.lessonsByMonth?.[m]||0);
-  if(c.financeModel==='perLesson'){
-   let rate=Number(c.academyRate||0),academy=lessons*rate;
-   lines.push(s.name+' ('+c.name+'): previsto XXX | recebido XXX | pendente XXX | aulas realizadas '+lessons+' × '+money(rate)+' = repasse academia '+money(academy));
-  }else{
+ let m=currentMonth(),sections=[];
+ // Alunos avulsos continuam separados, preservando os valores já exibidos.
+ const regularStudents=students.filter(s=>s.type!=='particular');
+ if(regularStudents.length){
+  let rows=regularStudents.map(s=>{
+   let paid=paidFor(s.id,m),pct=groupPercent(s),academy=academyFor(s,m);
+   return s.name+': previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | academia '+pct+'% ('+money(academy)+')';
+  });
+  let subtotal=regularStudents.reduce((a,s)=>a+academyFor(s,m),0);
+  sections.push('ALUNOS AVULSOS\\n'+rows.join('\\n')+'\\nRepasse da academia — Alunos avulsos: '+money(subtotal));
+ }
+ // Cada turma ganha seu próprio bloco e subtotal de repasse.
+ classes.forEach(c=>{
+  let roster=c.students||[];
+  let rows=roster.map(s=>{
+   let paid=classPaid(c,s.id,m),lessons=Number(s.lessonsByMonth?.[m]||0);
+   if(c.financeModel==='perLesson'){
+    let rate=Number(c.academyRate||0),academy=lessons*rate;
+    return s.name+': previsto XXX | recebido XXX | pendente XXX | aulas realizadas '+lessons+' × '+money(rate)+' = repasse academia '+money(academy);
+   }
    let academy=paid*Number(c.academyPercent??60)/100;
-   lines.push(s.name+' ('+c.name+'): previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | repasse academia '+money(academy));
-  }
- }));
+   return s.name+': previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | repasse academia '+money(academy);
+  });
+  let subtotal=classAcademy(c,m);
+  sections.push(c.name.toUpperCase()+'\\n'+(rows.length?rows.join('\\n'):'Nenhum aluno cadastrado nesta turma.')+'\\nRepasse da academia — '+c.name+': '+money(subtotal));
+ });
+ // Aulas individuais ficam em uma seção própria, sem expor os valores do professor.
+ const privateStudents=students.filter(s=>s.type==='particular');
+ if(privateStudents.length){
+  let rows=privateStudents.map(s=>{
+   let lessons=lessonsFor(s,m),academy=academyFor(s,m);
+   return s.name+': previsto XXX | recebido XXX | pendente XXX | aulas realizadas '+lessons+' × '+money(10)+' = repasse academia '+money(academy);
+  });
+  let subtotal=privateStudents.reduce((a,s)=>a+academyFor(s,m),0);
+  sections.push('AULA INDIVIDUAL\\n'+rows.join('\\n')+'\\nRepasse da academia — Aula individual: '+money(subtotal));
+ }
  let total=students.reduce((a,s)=>a+academyFor(s,m),0)+classes.reduce((a,c)=>a+classAcademy(c,m),0);
- let msg='TATAMEDESK — RESUMO FINANCEIRO '+m+'\\n\\n'+lines.join('\\n')+'\\n\\nRepasse total da academia: '+money(total);
+ let msg='TATAMEDESK — RESUMO FINANCEIRO '+m+'\\n\\n'+sections.join('\\n\\n')+'\\n\\nTOTAL GERAL DO REPASSE DA ACADEMIA: '+money(total);
  if(navigator.share){try{await navigator.share({title:'Resumo financeiro TatameDesk',text:msg});return;}catch(error){if(error?.name==='AbortError')return;}}
  await copyShareText(msg);
 };
