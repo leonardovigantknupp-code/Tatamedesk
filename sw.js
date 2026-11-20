@@ -1,4 +1,4 @@
-const CACHE='tatamedesk-v11';
+const CACHE='tatamedesk-v12';
 const FILES=['./','./index.html','./style.css','./app.js','./manifest.json','./icon.svg'];
 
 self.addEventListener('install',event=>{
