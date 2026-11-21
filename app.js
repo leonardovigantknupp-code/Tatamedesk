@@ -157,7 +157,10 @@ function financeReportData(month,selection=null){
  };
  const privateStudents=students.filter(s=>s.type==='particular'&&!classStudentIds.has(s.id)&&!belongsToClass(s));
  if(selected.has('individuais')&&privateStudents.length){
-  const rows=privateStudents.map(s=>s.name);
+  const rows=privateStudents.map(s=>{
+   const lessons=lessonsFor(s,month),total=lessons*10;
+   return lessons+' aulas × '+money(10)+' = '+money(total);
+  });
   sections.push({title:'AULA INDIVIDUAL',rows,showSubtotal:false});
  }
  const total=sections.reduce((sum,section)=>sum+(section.subtotal||0),0);
