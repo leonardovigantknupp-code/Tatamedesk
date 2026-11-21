@@ -135,8 +135,11 @@ function financeReportData(month,selection=null){
   const roster=c.students||[];
   const isIndividualClass=String(c.name||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').trim().toLocaleLowerCase('pt-BR').includes('individual');
   if(isIndividualClass){
-   const rows=roster.map(s=>s.name+' — XXX');
-   sections.push({title:'TURMA: '+c.name.toUpperCase(),rows:rows.length?rows:['Nenhum aluno cadastrado.'],showSubtotal:false});
+   const rows=roster.map(s=>{
+    const lessons=Number(s.lessonsByMonth?.[month]||0),total=lessons*10;
+    return lessons+' aulas × '+money(10)+' = '+money(total);
+   });
+   sections.push({title:'AULA INDIVIDUAL',rows:rows.length?rows:['Nenhuma aula registrada.'],showSubtotal:false});
    return;
   }
   const rows=roster.map(s=>{
