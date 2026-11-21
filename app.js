@@ -65,7 +65,7 @@ function renderClasses(){
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
 const money=v=>(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const financeValueVisibility={expected:true,received:true,pending:true};
+const financeValueVisibility={expected:true,received:true,pending:true,chart:true,academy:true};
 function financeEyeIcon(visible){
  return visible
   ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
@@ -79,9 +79,19 @@ function updateFinanceValue(key,value){
  button.setAttribute('aria-label',financeValueVisibility[key]?'Ocultar valor':'Mostrar valor');
  button.setAttribute('title',financeValueVisibility[key]?'Ocultar valor':'Mostrar valor');
 }
+function refreshFinancePrivacy(){
+ const chartButton=$('[data-finance-toggle="chart"]'),academyButton=$('[data-finance-toggle="academy"]');
+ const chartVisible=financeValueVisibility.chart,academyVisible=financeValueVisibility.academy;
+ ['received','pending'].forEach(key=>{const el=$('#fin-chart-'+key);if(el)el.textContent=chartVisible?money(el.dataset.rawValue):'R$ ••••'});
+ const academy=$('#fin-academy'),teacher=$('#fin-teacher');
+ if(academy)academy.textContent=academyVisible?money(academy.dataset.rawValue):'R$ ••••';
+ if(teacher)teacher.textContent='Professor: '+(academyVisible?money(teacher.dataset.rawValue):'R$ ••••')+' • sobre o recebido';
+ [[chartButton,chartVisible],[academyButton,academyVisible]].forEach(([button,visible])=>{if(!button)return;button.innerHTML=financeEyeIcon(visible);button.setAttribute('aria-label',visible?'Ocultar valores':'Mostrar valores');button.setAttribute('title',visible?'Ocultar valores':'Mostrar valores')});
+}
 window.toggleFinanceValue=key=>{
  if(!Object.prototype.hasOwnProperty.call(financeValueVisibility,key))return;
  financeValueVisibility[key]=!financeValueVisibility[key];
+ if(key==='chart'||key==='academy'){refreshFinancePrivacy();return}
  const amount=$('#fin-'+key),raw=amount?.dataset.rawValue;
  if(raw!==undefined)updateFinanceValue(key,Number(raw));
 };
@@ -113,9 +123,9 @@ function renderFinance(){
  updateFinanceValue('expected',expected);updateFinanceValue('received',received);updateFinanceValue('pending',pending);
  $('#fin-expected').dataset.rawValue=String(expected);$('#fin-received').dataset.rawValue=String(received);$('#fin-pending').dataset.rawValue=String(pending);
  const max=Math.max(received,pending,1);
- $('#finance-chart').innerHTML='<div class="chart-row"><span>Recebido</span><div class="bar-track"><i class="bar received" style="width:'+Math.min(100,received/max*100)+'%"></i></div><b>'+money(received)+'</b></div><div class="chart-row"><span>Pendente</span><div class="bar-track"><i class="bar pending" style="width:'+Math.min(100,pending/max*100)+'%"></i></div><b>'+money(pending)+'</b></div>';
+ $('#finance-chart').innerHTML='<div class="chart-row"><span>Recebido</span><div class="bar-track"><i class="bar received" style="width:'+Math.min(100,received/max*100)+'%"></i></div><b id="fin-chart-received" data-raw-value="'+received+'">'+money(received)+'</b></div><div class="chart-row"><span>Pendente</span><div class="bar-track"><i class="bar pending" style="width:'+Math.min(100,pending/max*100)+'%"></i></div><b id="fin-chart-pending" data-raw-value="'+pending+'">'+money(pending)+'</b></div>';
  const academy=students.reduce((a,s)=>a+academyFor(s,m),0)+classes.reduce((a,c)=>a+classAcademy(c,m),0),teacher=received-academy;
- $('#fin-academy').textContent=money(academy);$('#fin-teacher').textContent='Professor: '+money(teacher)+' • sobre o recebido';
+ $('#fin-academy').dataset.rawValue=String(academy);$('#fin-teacher').dataset.rawValue=String(teacher);refreshFinancePrivacy();
  $('#finance-groups').innerHTML=groups.map(g=>'<div class="group-row"><strong>'+esc(g.name)+'</strong><span>'+Number(g.percent)+'% para academia</span><button class="secondary" onclick="editGroup(\''+g.id+'\')">Editar</button></div>').join('');
  $('#student-group').innerHTML=groups.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name)+'</option>').join('');
  const globalRows=students.map(s=>{let paid=paidFor(s.id,m),due=Math.max(0,Number(s.amount)-paid),percent=groupPercent(s);return '<article class="student-row"><div class="student-main"><strong>'+esc(s.name)+'</strong><small>'+(s.type==='particular'?'Aula particular':'Aluno avulso')+' • '+(s.type==='particular'?'Academia: R$ 10,00 por aula':'Academia '+percent+'%')+'</small></div><div class="student-values"><b>'+money(s.amount)+'</b><small class="'+(due>0?'debt':'ok')+'">'+(due>0?'Falta '+money(due):'Pago')+'</small></div><div class="student-actions">'+(s.type==='particular'?'<label class="lessons-field">Aulas no mês<input type="number" min="0" step="1" value="'+lessonsFor(s,m)+'" onchange="setPrivateLessons(\''+s.id+'\',this.value)"></label>':'')+'<button class="primary small" onclick="payStudent(\''+s.id+'\')">＋ Pagamento</button><button class="secondary small" onclick="editStudent(\''+s.id+'\')">Editar</button><button class="icon-btn" onclick="historyStudent(\''+s.id+'\')">↻</button></div></article>'});
