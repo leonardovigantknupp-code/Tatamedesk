@@ -21,5 +21,16 @@
 .privacy-toggle svg{display:block;width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .privacy-value{display:inline-block!important;color:transparent!important;text-shadow:none!important;position:relative;min-width:4.5em;text-align:center;user-select:none}
 .privacy-value::after{content:"••••••";position:absolute;inset:0;color:var(--gold);letter-spacing:2px;text-align:center}
-body.privacy-on input[data-private-value]{filter:blur(7px);user-select:none}
+body.privacy-on input[data-private-value]{filter:blur(8px);user-select:none}
+body.privacy-on #view-finance .finance-stats b,
+body.privacy-on #view-finance .chart-row b,
+body.privacy-on #view-finance .repasse-value,
+body.privacy-on #view-finance #fin-teacher,
+body.privacy-on #view-finance .student-values,
+body.privacy-on #class-detail-dialog .detail-stats b,
+body.privacy-on #class-detail-dialog #detail-share,
+body.privacy-on #class-detail-dialog .student-main small,
+body.privacy-on #class-detail-dialog .student-values{filter:blur(8px);user-select:none}
+body.privacy-on #view-finance .student-values,
+body.privacy-on #class-detail-dialog .student-values{pointer-events:none}
 @media(max-width:760px){.topbar-actions{gap:6px}.privacy-toggle{flex-basis:40px;width:40px;height:40px;padding:8px}.privacy-toggle svg{width:21px;height:21px}.topbar-actions .primary{font-size:11px}}
