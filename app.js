@@ -123,44 +123,108 @@ async function copyShareText(value){
  }catch(error){}
  alert(value);return false;
 }
-$('#share-finance').onclick=async()=>{
- let m=currentMonth(),sections=[];
+function financeReportData(month){
+ const sections=[];
  const regularStudents=students.filter(s=>s.type!=='particular');
  if(regularStudents.length){
-  let rows=regularStudents.map(s=>{
-   let paid=paidFor(s.id,m),pct=groupPercent(s),academy=academyFor(s,m);
-   return '• '+s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | academia '+pct+'% ('+money(academy)+')';
+  const rows=regularStudents.map(s=>{
+   const paid=paidFor(s.id,month),pct=groupPercent(s),academy=academyFor(s,month);
+   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | academia '+pct+'% ('+money(academy)+')';
   });
-  let subtotal=regularStudents.reduce((a,s)=>a+academyFor(s,m),0);
-  sections.push('ALUNOS AVULSOS\n'+rows.join('\n')+'\nREPASSE DA ACADEMIA — ALUNOS AVULSOS: '+money(subtotal));
+  const subtotal=regularStudents.reduce((sum,s)=>sum+academyFor(s,month),0);
+  sections.push({title:'ALUNOS AVULSOS',rows,subtotalLabel:'REPASSE DA ACADEMIA — ALUNOS AVULSOS',subtotal});
  }
  classes.forEach(c=>{
-  let roster=c.students||[];
-  let rows=roster.map(s=>{
-   let paid=classPaid(c,s.id,m),lessons=Number(s.lessonsByMonth?.[m]||0);
+  const roster=c.students||[];
+  const rows=roster.map(s=>{
+   const lessons=Number(s.lessonsByMonth?.[month]||0);
    if(c.financeModel==='perLesson'){
-    let rate=Number(c.academyRate||0),academy=lessons*rate;
-    return '• '+s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas × '+money(rate)+' = repasse '+money(academy);
+    const rate=Number(c.academyRate||0),transfer=lessons*rate;
+    return s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas × '+money(rate)+' = repasse '+money(transfer);
    }
-   let academy=paid*Number(c.academyPercent??60)/100;
-   return '• '+s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,s.amount-paid))+' | repasse academia '+money(academy);
+   const paid=classPaid(c,s.id,month),academy=paid*Number(c.academyPercent??60)/100;
+   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | repasse academia '+money(academy);
   });
-  let subtotal=classAcademy(c,m);
-  sections.push('TURMA: '+c.name.toUpperCase()+'\n'+(rows.length?rows.join('\n'):'• Nenhum aluno cadastrado.')+'\n\nREPASSE DA ACADEMIA — '+c.name.toUpperCase()+': '+money(subtotal));
+  sections.push({title:'TURMA: '+c.name.toUpperCase(),rows:rows.length?rows:['Nenhum aluno cadastrado.'],subtotalLabel:'REPASSE DA ACADEMIA — '+c.name.toUpperCase(),subtotal:classAcademy(c,month)});
  });
  const privateStudents=students.filter(s=>s.type==='particular');
  if(privateStudents.length){
-  let rows=privateStudents.map(s=>{
-   let lessons=lessonsFor(s,m),academy=academyFor(s,m);
-   return '• '+s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
+  const rows=privateStudents.map(s=>{
+   const lessons=lessonsFor(s,month),academy=academyFor(s,month);
+   return s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
   });
-  let subtotal=privateStudents.reduce((a,s)=>a+academyFor(s,m),0);
-  sections.push('AULA INDIVIDUAL\n'+rows.join('\n')+'\n\nREPASSE DA ACADEMIA — AULA INDIVIDUAL: '+money(subtotal));
+  sections.push({title:'AULA INDIVIDUAL',rows,subtotalLabel:'REPASSE DA ACADEMIA — AULA INDIVIDUAL',subtotal:privateStudents.reduce((sum,s)=>sum+academyFor(s,month),0)});
  }
- let total=students.reduce((a,s)=>a+academyFor(s,m),0)+classes.reduce((a,c)=>a+classAcademy(c,m),0);
- let msg='TATAMEDESK — RESUMO FINANCEIRO\nMÊS: '+m+'\n\n'+sections.join('\n\n━━━━━━━━━━━━━━━━━━━━\n\n')+'\n\n━━━━━━━━━━━━━━━━━━━━\nTOTAL GERAL DO REPASSE DA ACADEMIA: '+money(total);
- if(navigator.share){try{await navigator.share({title:'Resumo financeiro TatameDesk',text:msg});return;}catch(error){if(error?.name==='AbortError')return;}}
- await copyShareText(msg);
+ const total=students.reduce((sum,s)=>sum+academyFor(s,month),0)+classes.reduce((sum,c)=>sum+classAcademy(c,month),0);
+ return {sections,total};
+}
+function buildFinancePdf(month){
+ const JsPDF=window.jspdf?.jsPDF||window.jsPDF;
+ if(!JsPDF)throw new Error('A biblioteca de PDF ainda não carregou. Verifique sua conexão e tente novamente.');
+ const doc=new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+ const pageW=210,left=16,right=194,contentW=178;
+ const {sections,total}=financeReportData(month);
+ const monthLabel=new Date(month+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ let y=16;
+ const navy=[13,27,46],gold=[208,163,62],ink=[36,48,64],muted=[103,117,136],pale=[244,247,250];
+ function topHeader(continued=false){
+  doc.setFillColor(...navy);doc.roundedRect(left,y,pageW-32,continued?19:30,3,3,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(continued?12:17);
+  doc.text(continued?'TATAMEDESK — RESUMO FINANCEIRO (continuação)':'TATAMEDESK',left+7,y+(continued?12:12));
+  if(!continued){doc.setFont('helvetica','normal');doc.setFontSize(10);doc.text('RELATÓRIO DE REPASSE DA ACADEMIA',left+7,y+20);doc.setTextColor(238,199,105);doc.setFont('helvetica','bold');doc.text(monthLabel.toUpperCase(),right-7,y+20,{align:'right'});}
+  y+=continued?27:38;
+ }
+ function ensureSpace(height){
+  if(y+height>278){doc.addPage();y=14;topHeader(true);}
+ }
+ function drawSection(section){
+  ensureSpace(18);
+  doc.setFillColor(...pale);doc.roundedRect(left,y,contentW,10,2,2,'F');
+  doc.setTextColor(...navy);doc.setFont('helvetica','bold');doc.setFontSize(10);
+  doc.text(section.title,left+4,y+6.7);y+=15;
+  section.rows.forEach((row,index)=>{
+   const lines=doc.splitTextToSize('• '+row,contentW-10);
+   const height=lines.length*4.7+3;
+   ensureSpace(height+2);
+   doc.setFont('helvetica','normal');doc.setFontSize(8.7);doc.setTextColor(...ink);
+   doc.text(lines,left+4,y);
+   y+=height;
+   if(index<section.rows.length-1){doc.setDrawColor(229,233,238);doc.setLineWidth(.2);doc.line(left+4,y-1,right-4,y-1);}
+  });
+  ensureSpace(17);
+  doc.setDrawColor(...gold);doc.setLineWidth(.45);doc.line(left+4,y,right-4,y);y+=6;
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...navy);
+  doc.text(section.subtotalLabel,left+4,y);
+  doc.setTextColor(143,103,20);doc.text(money(section.subtotal),right-4,y,{align:'right'});
+  y+=12;
+ }
+ topHeader(false);
+ if(!sections.length){doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...muted);doc.text('Nenhum lançamento financeiro cadastrado para este mês.',left,y);y+=12;}
+ sections.forEach(drawSection);
+ ensureSpace(27);
+ doc.setFillColor(...navy);doc.roundedRect(left,y,contentW,20,3,3,'F');
+ doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(10);
+ doc.text('TOTAL GERAL DO REPASSE DA ACADEMIA',left+6,y+8);
+ doc.setTextColor(238,199,105);doc.setFontSize(14);doc.text(money(total),right-6,y+15,{align:'right'});
+ const pages=doc.getNumberOfPages();
+ for(let page=1;page<=pages;page++){doc.setPage(page);doc.setDrawColor(220,225,231);doc.setLineWidth(.2);doc.line(left,285,right,285);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);doc.text('TatameDesk • Relatório financeiro',left,290);doc.text('Página '+page+' de '+pages,right,290,{align:'right'});}
+ return doc;
+}
+$('#share-finance').onclick=async()=>{
+ const month=currentMonth();
+ try{
+  const doc=buildFinancePdf(month);
+  const blob=doc.output('blob');
+  const file=new File([blob],'TatameDesk-Resumo-Financeiro-'+month+'.pdf',{type:'application/pdf'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+   try{await navigator.share({title:'Resumo financeiro TatameDesk',text:'Resumo do repasse da academia — '+month,fileName:file.name,files:[file]});return;}
+   catch(error){if(error?.name==='AbortError')return;}
+  }
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download=file.name;document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  toast('PDF gerado. Abra o arquivo para compartilhar.');
+ }catch(error){console.error(error);alert(error.message||'Não foi possível gerar o PDF. Tente novamente.');}
 };
 
 let activeClassId=null;
