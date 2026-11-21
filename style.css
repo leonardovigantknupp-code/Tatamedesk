@@ -24,3 +24,7 @@
 .finance-eye{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:1px solid var(--line);border-radius:7px;background:#0c1728;color:var(--muted);cursor:pointer}
 .finance-eye:hover{color:var(--gold);border-color:var(--gold)}
 .finance-eye svg{display:block;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* Olhos de privacidade no gráfico e no repasse */
+.finance-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.finance-panel-heading h3{margin:0}
