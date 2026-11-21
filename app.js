@@ -123,10 +123,11 @@ async function copyShareText(value){
  }catch(error){}
  alert(value);return false;
 }
-function financeReportData(month){
+function financeReportData(month,selection=null){
  const sections=[];
+ const selected=selection||new Set(['avulsos','individuais',...classes.map(c=>'class:'+c.id)]);
  const regularStudents=students.filter(s=>s.type!=='particular');
- if(regularStudents.length){
+ if(selected.has('avulsos')&&regularStudents.length){
   const rows=regularStudents.map(s=>{
    const paid=paidFor(s.id,month),pct=groupPercent(s),academy=academyFor(s,month);
    return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | academia '+pct+'% ('+money(academy)+')';
@@ -134,7 +135,7 @@ function financeReportData(month){
   const subtotal=regularStudents.reduce((sum,s)=>sum+academyFor(s,month),0);
   sections.push({title:'ALUNOS AVULSOS',rows,subtotalLabel:'REPASSE DA ACADEMIA — ALUNOS AVULSOS',subtotal});
  }
- classes.forEach(c=>{
+ classes.filter(c=>selected.has('class:'+c.id)).forEach(c=>{
   const roster=c.students||[];
   const rows=roster.map(s=>{
    const lessons=Number(s.lessonsByMonth?.[month]||0);
@@ -148,15 +149,15 @@ function financeReportData(month){
   });
   sections.push({title:'TURMA: '+c.name.toUpperCase(),rows:rows.length?rows:['Nenhum aluno cadastrado.'],subtotalLabel:'REPASSE DA ACADEMIA — '+c.name.toUpperCase(),subtotal:classAcademy(c,month)});
  });
- const classStudentIds=new Set(classStudents.map(x=>x.student.id));
+ const classStudentIds=new Set(classes.flatMap(c=>(c.students||[]).map(s=>s.id)));
  const normalizeStudentName=name=>String(name||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9 ]/g,' ').trim().replace(/\\s+/g,' ');
- const classStudentNames=classStudents.map(x=>normalizeStudentName(x.student.name));
+ const classStudentNames=classes.flatMap(c=>(c.students||[]).map(s=>normalizeStudentName(s.name)));
  const belongsToClass=s=>{
   const name=normalizeStudentName(s.name);
   return classStudentNames.some(className=>className===name||(name.length>=5&&className.startsWith(name+' '))||(className.length>=5&&name.startsWith(className+' ')));
  };
  const privateStudents=students.filter(s=>s.type==='particular'&&!classStudentIds.has(s.id)&&!belongsToClass(s));
- if(privateStudents.length){
+ if(selected.has('individuais')&&privateStudents.length){
   const rows=privateStudents.map(s=>{
    const lessons=lessonsFor(s,month),academy=academyFor(s,month);
    const paid=paidFor(s.id,month),due=Math.max(0,Number(s.amount||0)-paid);
@@ -164,15 +165,15 @@ function financeReportData(month){
   });
   sections.push({title:'AULA INDIVIDUAL',rows,subtotalLabel:'REPASSE DA ACADEMIA — AULA INDIVIDUAL',subtotal:privateStudents.reduce((sum,s)=>sum+academyFor(s,month),0)});
  }
- const total=students.reduce((sum,s)=>sum+academyFor(s,month),0)+classes.reduce((sum,c)=>sum+classAcademy(c,month),0);
+ const total=sections.reduce((sum,section)=>sum+section.subtotal,0);
  return {sections,total};
 }
-function buildFinancePdf(month){
+function buildFinancePdf(month,selection){
  const JsPDF=window.jspdf?.jsPDF||window.jsPDF;
  if(!JsPDF)throw new Error('A biblioteca de PDF ainda não carregou. Verifique sua conexão e tente novamente.');
  const doc=new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
  const pageW=210,left=16,right=194,contentW=178;
- const {sections,total}=financeReportData(month);
+ const {sections,total}=financeReportData(month,selection);
  const monthLabel=new Date(month+'-01T12:00:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
  let y=16;
  const navy=[13,27,46],gold=[208,163,62],ink=[36,48,64],muted=[103,117,136],pale=[244,247,250];
@@ -219,14 +220,26 @@ function buildFinancePdf(month){
  for(let page=1;page<=pages;page++){doc.setPage(page);doc.setDrawColor(220,225,231);doc.setLineWidth(.2);doc.line(left,285,right,285);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...muted);doc.text('TatameDesk • Relatório financeiro',left,290);doc.text('Página '+page+' de '+pages,right,290,{align:'right'});}
  return doc;
 }
-$('#share-finance').onclick=async()=>{
+function openFinanceReportDialog(){
+ const host=$('#finance-report-options');
+ const options=[{id:'avulsos',label:'Alunos avulsos'},{id:'individuais',label:'Aulas individuais'},...classes.map(c=>({id:'class:'+c.id,label:c.name}))];
+ host.innerHTML=options.map(o=>'<label class="report-option" style="display:flex;align-items:center;gap:10px;padding:9px 4px"><input type="checkbox" name="finance-report-option" value="'+esc(o.id)+'" checked><span>'+esc(o.label)+'</span></label>').join('')||'<p class="muted">Nenhuma turma ou aluno cadastrado.</p>';
+ $('#finance-report-dialog').showModal();
+}
+$('#share-finance').onclick=openFinanceReportDialog;
+$('#finance-report-form').onsubmit=async e=>{
+ if(e.submitter?.value==='cancel')return;
+ e.preventDefault();
+ const selection=new Set([...document.querySelectorAll('input[name="finance-report-option"]:checked')].map(input=>input.value));
+ if(!selection.size){alert('Marque pelo menos uma turma ou categoria para gerar o fechamento.');return;}
+ $('#finance-report-dialog').close();
  const month=currentMonth();
  try{
-  const doc=buildFinancePdf(month);
+  const doc=buildFinancePdf(month,selection);
   const blob=doc.output('blob');
-  const file=new File([blob],'TatameDesk-Resumo-Financeiro-'+month+'.pdf',{type:'application/pdf'});
+  const file=new File([blob],'TatameDesk-Fechamento-'+month+'.pdf',{type:'application/pdf'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-   try{await navigator.share({title:'Resumo financeiro TatameDesk',text:'Resumo do repasse da academia — '+month,files:[file]});return;}
+   try{await navigator.share({title:'Fechamento financeiro TatameDesk',text:'Fechamento financeiro — '+month,files:[file]});return;}
    catch(error){if(error?.name==='AbortError')return;}
   }
   const url=URL.createObjectURL(blob),link=document.createElement('a');
