@@ -140,7 +140,8 @@ function financeReportData(month){
    const lessons=Number(s.lessonsByMonth?.[month]||0);
    if(c.financeModel==='perLesson'){
     const rate=Number(c.academyRate||0),transfer=lessons*rate;
-    return s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas × '+money(rate)+' = repasse '+money(transfer);
+    const paid=classPaid(c,s.id,month),due=Math.max(0,Number(s.amount||0)-paid);
+    return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(due)+' | '+lessons+' aulas × '+money(rate)+' = repasse '+money(transfer);
    }
    const paid=classPaid(c,s.id,month),academy=paid*Number(c.academyPercent??60)/100;
    return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | repasse academia '+money(academy);
@@ -158,7 +159,8 @@ function financeReportData(month){
  if(privateStudents.length){
   const rows=privateStudents.map(s=>{
    const lessons=lessonsFor(s,month),academy=academyFor(s,month);
-   return s.name+' — previsto XXX | recebido XXX | pendente XXX | '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
+   const paid=paidFor(s.id,month),due=Math.max(0,Number(s.amount||0)-paid);
+   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(due)+' | '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
   });
   sections.push({title:'AULA INDIVIDUAL',rows,subtotalLabel:'REPASSE DA ACADEMIA — AULA INDIVIDUAL',subtotal:privateStudents.reduce((sum,s)=>sum+academyFor(s,month),0)});
  }
