@@ -1,4 +1,4 @@
-const CACHE='tatamedesk-v18';
+const CACHE='tatamedesk-v19';
 const FILES=['./','./index.html','./style.css','./app.js','./manifest.json','./icon.svg'];
 
 self.addEventListener('install',event=>{
@@ -12,24 +12,25 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)));
+    await Promise.all(keys.filter(key=>key.startsWith('tatamedesk-')&&key!==CACHE).map(key=>caches.delete(key)));
     await self.clients.claim();
   })());
 });
 
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET')return;
+  const url=new URL(event.request.url);
+  if(url.origin!==self.location.origin)return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE);
-    const cached=await cache.match(event.request);
-    if(cached)return cached;
     try{
-      const response=await fetch(event.request);
-      if(response&&response.ok&&new URL(event.request.url).origin===self.location.origin){
-        cache.put(event.request,response.clone());
-      }
-      return response;
+      // Sempre tenta a versão publicada primeiro para não servir relatórios/código antigos.
+      const fresh=await fetch(event.request,{cache:'no-store'});
+      if(fresh&&fresh.ok)await cache.put(event.request,fresh.clone());
+      return fresh;
     }catch(error){
+      const cached=await cache.match(event.request);
+      if(cached)return cached;
       if(event.request.mode==='navigate')return cache.match('./index.html');
       throw error;
     }
