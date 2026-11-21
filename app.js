@@ -165,7 +165,7 @@ function financeReportData(month,selection=null){
  if(selected.has('individuais')&&privateStudents.length){
   const rows=privateStudents.map(s=>{
    const lessons=lessonsFor(s,month),academy=academyFor(s,month);
-   return s.name+' — '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
+   return s.name+' — previsto XXX | recebido XXX | '+lessons+' aulas × '+money(10)+' = repasse academia '+money(academy);
   });
   sections.push({title:'AULA INDIVIDUAL',rows,subtotalLabel:'REPASSE DA ACADEMIA — AULA INDIVIDUAL',subtotal:privateStudents.reduce((sum,s)=>sum+academyFor(s,month),0)});
  }
