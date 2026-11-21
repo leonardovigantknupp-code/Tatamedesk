@@ -147,7 +147,9 @@ function financeReportData(month){
   });
   sections.push({title:'TURMA: '+c.name.toUpperCase(),rows:rows.length?rows:['Nenhum aluno cadastrado.'],subtotalLabel:'REPASSE DA ACADEMIA — '+c.name.toUpperCase(),subtotal:classAcademy(c,month)});
  });
- const privateStudents=students.filter(s=>s.type==='particular');
+ const classStudentIds=new Set(classStudents.map(x=>x.student.id));
+ const classStudentNames=new Set(classStudents.map(x=>String(x.student.name||'').trim().toLocaleLowerCase('pt-BR')));
+ const privateStudents=students.filter(s=>s.type==='particular'&&!classStudentIds.has(s.id)&&!classStudentNames.has(String(s.name||'').trim().toLocaleLowerCase('pt-BR')));
  if(privateStudents.length){
   const rows=privateStudents.map(s=>{
    const lessons=lessonsFor(s,month),academy=academyFor(s,month);
