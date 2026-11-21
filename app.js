@@ -314,6 +314,7 @@ function setPrivacyHidden(hidden){
  }
 }
 document.getElementById('privacy-toggle')?.addEventListener('click',()=>setPrivacyHidden(!privacyHidden));
+['student-amount','payment-amount','class-student-amount','class-payment-amount','class-academy-rate'].forEach(id=>document.getElementById(id)?.setAttribute('data-private-value',''));
 const privacyObserver=new MutationObserver(records=>{
  if(!privacyHidden)return;
  records.forEach(record=>{
