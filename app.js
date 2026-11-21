@@ -278,55 +278,23 @@ $('#share-class').onclick=async()=>{
 };
 
 
-/* Privacidade visual: oculta valores monetários sem alterar os dados salvos. */
+/* Privacidade visual: alterna uma camada CSS de desfoque, sem modificar dados. */
 let privacyHidden=false;
-const moneyTextPattern=/R\$\s*[\d.,]+/;
-function maskMoneyTextNodes(root=document.body){
- if(!privacyHidden||!root)return;
- const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
- const nodes=[];let node;
- while((node=walker.nextNode())){
-  if(node.parentElement?.closest('.privacy-value,script,style'))continue;
-  if(moneyTextPattern.test(node.nodeValue||''))nodes.push(node);
- }
- nodes.forEach(textNode=>{
-  const span=document.createElement('span');
-  span.className='privacy-value';
-  span.textContent=textNode.nodeValue;
-  textNode.parentNode.replaceChild(span,textNode);
- });
-}
 function setPrivacyHidden(hidden){
- privacyHidden=hidden;
- document.body.classList.toggle('privacy-on',hidden);
- if(hidden){
-  maskMoneyTextNodes();
- }else{
-  document.querySelectorAll('.privacy-value').forEach(span=>span.replaceWith(document.createTextNode(span.textContent)));
- }
+ privacyHidden=Boolean(hidden);
+ document.body.classList.toggle('privacy-on',privacyHidden);
  const button=document.getElementById('privacy-toggle');
  if(button){
-  button.setAttribute('aria-pressed',String(hidden));
-  button.setAttribute('aria-label',hidden?'Mostrar valores':'Ocultar valores');
-  button.title=hidden?'Mostrar valores':'Ocultar valores';
-  button.innerHTML=hidden
+  button.setAttribute('aria-pressed',String(privacyHidden));
+  button.setAttribute('aria-label',privacyHidden?'Mostrar valores':'Ocultar valores');
+  button.title=privacyHidden?'Mostrar valores':'Ocultar valores';
+  button.innerHTML=privacyHidden
    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A11.5 11.5 0 0112 5c5 0 8.5 4.5 9.5 7a12.8 12.8 0 01-3.1 4.3M6.2 6.2C3.9 7.7 2.8 10 2.5 12c.6 1.5 1.7 3 3.3 4.2A10.7 10.7 0 0012 19c1.1 0 2.1-.2 3-.5"/></svg>'
    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"/><circle cx="12" cy="12" r="3"/></svg>';
  }
 }
 document.getElementById('privacy-toggle')?.addEventListener('click',()=>setPrivacyHidden(!privacyHidden));
 ['student-amount','payment-amount','class-student-amount','class-payment-amount','class-academy-rate'].forEach(id=>document.getElementById(id)?.setAttribute('data-private-value',''));
-const privacyObserver=new MutationObserver(records=>{
- if(!privacyHidden)return;
- records.forEach(record=>{
-  record.addedNodes.forEach(node=>{
-   if(node.nodeType===Node.TEXT_NODE){
-    if(moneyTextPattern.test(node.nodeValue||'')&&!node.parentElement?.closest('.privacy-value'))maskMoneyTextNodes(node.parentElement);
-   }else if(node.nodeType===Node.ELEMENT_NODE&&!node.closest('.privacy-value'))maskMoneyTextNodes(node);
-  });
- });
-});
-privacyObserver.observe(document.body,{childList:true,subtree:true});
 
 // Inicializa somente depois de registrar todos os componentes e eventos.
 render();
