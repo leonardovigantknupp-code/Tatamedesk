@@ -65,6 +65,26 @@ function renderClasses(){
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
 const money=v=>(Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const financeValueVisibility={expected:true,received:true,pending:true};
+function financeEyeIcon(visible){
+ return visible
+  ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+  : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18"></path><path d="M10.6 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a15 15 0 0 1-4 4.5M6.2 6.2C3.5 8 2 12 2 12s3.5 7 10 7c1.3 0 2.5-.3 3.5-.8"></path></svg>';
+}
+function updateFinanceValue(key,value){
+ const amount=$('#fin-'+key),button=$('[data-finance-toggle="'+key+'"]');
+ if(!amount||!button)return;
+ amount.textContent=financeValueVisibility[key]?money(value):'R$ ••••';
+ button.innerHTML=financeEyeIcon(financeValueVisibility[key]);
+ button.setAttribute('aria-label',financeValueVisibility[key]?'Ocultar valor':'Mostrar valor');
+ button.setAttribute('title',financeValueVisibility[key]?'Ocultar valor':'Mostrar valor');
+}
+window.toggleFinanceValue=key=>{
+ if(!Object.prototype.hasOwnProperty.call(financeValueVisibility,key))return;
+ financeValueVisibility[key]=!financeValueVisibility[key];
+ const amount=$('#fin-'+key),raw=amount?.dataset.rawValue;
+ if(raw!==undefined)updateFinanceValue(key,Number(raw));
+};
 const currentMonth=()=>$('#finance-month').value||todayISO().slice(0,7);
 function groupPercent(s){let g=groups.find(x=>x.id===s.groupId);return Number(g?.percent??60)}
 function lessonsFor(s,m){return Math.max(0,Number(s.lessonsByMonth?.[m]||0))}
@@ -90,7 +110,8 @@ function renderFinance(){
  const classReceived=classes.reduce((a,c)=>a+(c.payments||[]).filter(p=>p.month===m).reduce((b,p)=>b+Number(p.amount||0),0),0);
  const received=globalReceived+classReceived;
  const pending=students.reduce((a,s)=>a+Math.max(0,Number(s.amount||0)-paidFor(s.id,m)),0)+classStudents.reduce((a,x)=>a+Math.max(0,Number(x.student.amount||0)-classPaid(x.cls,x.student.id,m)),0);
- $('#fin-expected').textContent=money(expected);$('#fin-received').textContent=money(received);$('#fin-pending').textContent=money(pending);
+ updateFinanceValue('expected',expected);updateFinanceValue('received',received);updateFinanceValue('pending',pending);
+ $('#fin-expected').dataset.rawValue=String(expected);$('#fin-received').dataset.rawValue=String(received);$('#fin-pending').dataset.rawValue=String(pending);
  const max=Math.max(received,pending,1);
  $('#finance-chart').innerHTML='<div class="chart-row"><span>Recebido</span><div class="bar-track"><i class="bar received" style="width:'+Math.min(100,received/max*100)+'%"></i></div><b>'+money(received)+'</b></div><div class="chart-row"><span>Pendente</span><div class="bar-track"><i class="bar pending" style="width:'+Math.min(100,pending/max*100)+'%"></i></div><b>'+money(pending)+'</b></div>';
  const academy=students.reduce((a,s)=>a+academyFor(s,m),0)+classes.reduce((a,c)=>a+classAcademy(c,m),0),teacher=received-academy;
