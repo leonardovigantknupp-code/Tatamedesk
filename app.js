@@ -130,7 +130,7 @@ function financeReportData(month,selection=null){
  if(selected.has('avulsos')&&regularStudents.length){
   const rows=regularStudents.map(s=>{
    const paid=paidFor(s.id,month),pct=groupPercent(s),academy=academyFor(s,month);
-   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | academia '+pct+'% ('+money(academy)+')';
+   return s.name+' — repasse academia '+money(academy);
   });
   const subtotal=regularStudents.reduce((sum,s)=>sum+academyFor(s,month),0);
   sections.push({title:'ALUNOS AVULSOS',rows,subtotalLabel:'REPASSE DA ACADEMIA — ALUNOS AVULSOS',subtotal});
@@ -142,10 +142,10 @@ function financeReportData(month,selection=null){
    if(c.financeModel==='perLesson'){
     const rate=Number(c.academyRate||0),transfer=lessons*rate;
     const paid=classPaid(c,s.id,month),due=Math.max(0,Number(s.amount||0)-paid);
-    return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(due)+' | '+lessons+' aulas × '+money(rate)+' = repasse '+money(transfer);
+    return s.name+' — '+lessons+' aulas × '+money(rate)+' = repasse '+money(transfer);
    }
    const paid=classPaid(c,s.id,month),academy=paid*Number(c.academyPercent??60)/100;
-   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | repasse academia '+money(academy);
+   return s.name+' — repasse academia '+money(academy);
   });
   sections.push({title:'TURMA: '+c.name.toUpperCase(),rows:rows.length?rows:['Nenhum aluno cadastrado.'],subtotalLabel:'REPASSE DA ACADEMIA — '+c.name.toUpperCase(),subtotal:classAcademy(c,month)});
  });
@@ -161,7 +161,7 @@ function financeReportData(month,selection=null){
   const rows=privateStudents.map(s=>{
    const lessons=lessonsFor(s,month),academy=academyFor(s,month);
    const paid=paidFor(s.id,month),due=Math.max(0,Number(s.amount||0)-paid);
-   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(due)+' | '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
+   return s.name+' — '+lessons+' aulas × '+money(10)+' = repasse '+money(academy);
   });
   sections.push({title:'AULA INDIVIDUAL',rows,subtotalLabel:'REPASSE DA ACADEMIA — AULA INDIVIDUAL',subtotal:privateStudents.reduce((sum,s)=>sum+academyFor(s,month),0)});
  }
