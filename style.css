@@ -17,3 +17,10 @@
 
 /* Controle de privacidade dos valores financeiros */
 .topbar-actions{display:flex;align-items:center;gap:9px}
+
+/* Olhos individuais dos três cartões do resumo financeiro */
+.finance-stat-heading{display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:22px}
+.finance-stat-heading span{display:block;min-width:0}
+.finance-eye{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;padding:4px;border:1px solid var(--line);border-radius:7px;background:#0c1728;color:var(--muted);cursor:pointer}
+.finance-eye:hover{color:var(--gold);border-color:var(--gold)}
+.finance-eye svg{display:block;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
