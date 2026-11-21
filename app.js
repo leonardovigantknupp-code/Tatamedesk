@@ -308,9 +308,10 @@ function setPrivacyHidden(hidden){
  if(button){
   button.setAttribute('aria-pressed',String(hidden));
   button.setAttribute('aria-label',hidden?'Mostrar valores':'Ocultar valores');
+  button.title=hidden?'Mostrar valores':'Ocultar valores';
   button.innerHTML=hidden
-   ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A11.5 11.5 0 0112 5c5 0 8.5 4.5 9.5 7a12.8 12.8 0 01-3.1 4.3M6.2 6.2C3.9 7.7 2.8 10 2.5 12c.6 1.5 1.7 3 3.3 4.2A10.7 10.7 0 0012 19c1.1 0 2.1-.2 3-.5"/></svg> Mostrar valores'
-   : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"/><circle cx="12" cy="12" r="3"/></svg> Ocultar valores';
+   ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.2A11.5 11.5 0 0112 5c5 0 8.5 4.5 9.5 7a12.8 12.8 0 01-3.1 4.3M6.2 6.2C3.9 7.7 2.8 10 2.5 12c.6 1.5 1.7 3 3.3 4.2A10.7 10.7 0 0012 19c1.1 0 2.1-.2 3-.5"/></svg>'
+   : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5 12 5s9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z"/><circle cx="12" cy="12" r="3"/></svg>';
  }
 }
 document.getElementById('privacy-toggle')?.addEventListener('click',()=>setPrivacyHidden(!privacyHidden));
