@@ -164,12 +164,12 @@ function financeReportData(month,selection=null){
  const privateStudents=students.filter(s=>s.type==='particular'&&!classStudentIds.has(s.id)&&!belongsToClass(s));
  if(selected.has('individuais')&&privateStudents.length){
   const rows=privateStudents.map(s=>{
-   const lessons=lessonsFor(s,month),academy=academyFor(s,month);
-   return s.name+' — previsto XXX | recebido XXX | '+lessons+' aulas × '+money(10)+' = repasse academia '+money(academy);
+   const lessons=lessonsFor(s,month),teacher=lessons*10;
+   return s.name+' — '+lessons+' aulas × '+money(10)+' = professor '+money(teacher);
   });
-  sections.push({title:'AULA INDIVIDUAL',rows,subtotalLabel:'REPASSE DA ACADEMIA — AULA INDIVIDUAL',subtotal:privateStudents.reduce((sum,s)=>sum+academyFor(s,month),0)});
+  sections.push({title:'AULA INDIVIDUAL',rows,showSubtotal:false});
  }
- const total=sections.reduce((sum,section)=>sum+section.subtotal,0);
+ const total=sections.reduce((sum,section)=>sum+(section.subtotal||0),0);
  return {sections,total};
 }
 function buildFinancePdf(month,selection){
@@ -205,12 +205,14 @@ function buildFinancePdf(month,selection){
    y+=height;
    if(index<section.rows.length-1){doc.setDrawColor(229,233,238);doc.setLineWidth(.2);doc.line(left+4,y-1,right-4,y-1);}
   });
-  ensureSpace(17);
-  doc.setDrawColor(...gold);doc.setLineWidth(.45);doc.line(left+4,y,right-4,y);y+=6;
-  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...navy);
-  doc.text(section.subtotalLabel,left+4,y);
-  doc.setTextColor(143,103,20);doc.text(money(section.subtotal),right-4,y,{align:'right'});
-  y+=12;
+  if(section.showSubtotal!==false){
+   ensureSpace(17);
+   doc.setDrawColor(...gold);doc.setLineWidth(.45);doc.line(left+4,y,right-4,y);y+=6;
+   doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...navy);
+   doc.text(section.subtotalLabel,left+4,y);
+   doc.setTextColor(143,103,20);doc.text(money(section.subtotal),right-4,y,{align:'right'});
+   y+=12;
+  }
  }
  topHeader(false);
  if(!sections.length){doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...muted);doc.text('Nenhum lançamento financeiro cadastrado para este mês.',left,y);y+=12;}
