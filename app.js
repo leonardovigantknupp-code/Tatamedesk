@@ -280,7 +280,7 @@ $('#share-class').onclick=async()=>{
 
 /* Privacidade visual: oculta valores monetários sem alterar os dados salvos. */
 let privacyHidden=false;
-const moneyTextPattern=/R\\$\\s*[\\d.,]+/;
+const moneyTextPattern=/R\$\s*[\d.,]+/;
 function maskMoneyTextNodes(root=document.body){
  if(!privacyHidden||!root)return;
  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
