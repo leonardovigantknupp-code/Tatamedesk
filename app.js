@@ -128,21 +128,28 @@ function financeReportData(month,selection=null){
  const selected=selection||new Set(['avulsos','individuais',...classes.map(c=>'class:'+c.id)]);
  const regularStudents=students.filter(s=>s.type!=='particular');
  if(selected.has('avulsos')&&regularStudents.length){
-  const rows=regularStudents.map(s=>s.name);
-  sections.push({title:'ALUNOS AVULSOS',rows,showSubtotal:false});
+  const rows=regularStudents.filter(s=>!classes.some(c=>(c.students||[]).some(cs=>cs.id===s.id))).map(s=>s.name);
+  if(rows.length)sections.push({title:'ALUNOS AVULSOS',rows,showSubtotal:false});
  }
- classes.filter(c=>selected.has('class:'+c.id)).forEach(c=>{
+ const individualRows=[];
+ const individualIds=new Set();
+ classes.filter(c=>selected.has('class:'+c.id)||selected.has('individuais')).forEach(c=>{
   const roster=c.students||[];
-  const isIndividualClass=String(c.name||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').trim().toLocaleLowerCase('pt-BR').includes('individual');
-  if(isIndividualClass){
-   const rows=roster.map(s=>{
+  const className=String(c.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR');
+  const isIndividualClass=className.includes('individual')||className.includes('particular');
+  const individualRoster=isIndividualClass?roster:roster.filter(s=>students.some(globalStudent=>globalStudent.id===s.id&&globalStudent.type==='particular'));
+  if(selected.has('individuais')){
+   individualRoster.forEach(s=>{
+    if(individualIds.has(s.id))return;
+    individualIds.add(s.id);
     const lessons=Number(s.lessonsByMonth?.[month]||0),total=lessons*10;
-    return lessons+' aulas × '+money(10)+' = '+money(total);
+    individualRows.push(lessons+' aulas × '+money(10)+' = '+money(total));
    });
-   sections.push({title:'AULA INDIVIDUAL',rows:rows.length?rows:['Nenhuma aula registrada.'],showSubtotal:false});
-   return;
   }
-  const rows=roster.map(s=>{
+  if(isIndividualClass||!selected.has('class:'+c.id))return;
+  const regularRoster=roster.filter(s=>!individualRoster.some(individual=>individual.id===s.id));
+  if(!regularRoster.length)return;
+  const rows=regularRoster.map(s=>{
    const lessons=Number(s.lessonsByMonth?.[month]||0),paid=classPaid(c,s.id,month),due=Math.max(0,Number(s.amount||0)-paid);
    if(c.financeModel==='perLesson'){
     const rate=Number(c.academyRate||0),transfer=lessons*rate,teacher=paid-transfer;
@@ -152,25 +159,21 @@ function financeReportData(month,selection=null){
    const academyPct=Number(c.academyPercent??60),teacherPct=100-academyPct,academy=paid*academyPct/100,teacher=paid-academy;
    return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(due)+' | academia '+academyPct+'% ('+money(academy)+') | professor '+teacherPct+'% ('+money(teacher)+')';
   });
-  const received=roster.reduce((sum,s)=>sum+classPaid(c,s.id,month),0);
-  const academy=classAcademy(c,month),teacher=received-academy;
-  if(roster.length)rows.push('TOTAL RECEBIDO: '+money(received)+' | REPASSE ACADEMIA: '+money(academy)+' | PROFESSOR: '+money(teacher));
+  const regularIds=new Set(regularRoster.map(s=>s.id));
+  const regularPayments=(c.payments||[]).filter(p=>regularIds.has(p.studentId));
+  const regularClass={...c,students:regularRoster,payments:regularPayments};
+  const received=regularPayments.filter(p=>p.month===month).reduce((sum,p)=>sum+Number(p.amount||0),0);
+  const academy=classAcademy(regularClass,month),teacher=received-academy;
+  if(rows.length)rows.push('TOTAL RECEBIDO: '+money(received)+' | REPASSE ACADEMIA: '+money(academy)+' | PROFESSOR: '+money(teacher));
   sections.push({title:'TURMA: '+c.name.toUpperCase(),rows:rows.length?rows:['Nenhum aluno cadastrado.'],subtotalLabel:'REPASSE DA ACADEMIA — '+c.name.toUpperCase(),subtotal:academy});
  });
- const classStudentIds=new Set(classes.flatMap(c=>(c.students||[]).map(s=>s.id)));
- const normalizeStudentName=name=>String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9 ]/g,' ').trim().replace(/\s+/g,' ');
- const classStudentNames=classes.flatMap(c=>(c.students||[]).map(s=>normalizeStudentName(s.name)));
- const belongsToClass=s=>{
-  const name=normalizeStudentName(s.name);
-  return classStudentNames.some(className=>className===name||(name.length>=5&&className.startsWith(name+' '))||(className.length>=5&&name.startsWith(className+' ')));
- };
- const privateStudents=students.filter(s=>s.type==='particular'&&!classStudentIds.has(s.id)&&!belongsToClass(s));
- if(selected.has('individuais')&&privateStudents.length){
-  const rows=privateStudents.map(s=>{
+ const privateStudents=students.filter(s=>s.type==='particular'&&!individualIds.has(s.id)&&!classes.some(c=>(c.students||[]).some(cs=>cs.id===s.id)));
+ if(selected.has('individuais')){
+  privateStudents.forEach(s=>{
    const lessons=lessonsFor(s,month),total=lessons*10;
-   return lessons+' aulas × '+money(10)+' = '+money(total);
+   individualRows.push(lessons+' aulas × '+money(10)+' = '+money(total));
   });
-  sections.push({title:'AULA INDIVIDUAL',rows,showSubtotal:false});
+  if(individualRows.length)sections.push({title:'AULAS INDIVIDUAIS',rows:individualRows,showSubtotal:false});
  }
  const total=sections.reduce((sum,section)=>sum+(section.subtotal||0),0);
  return {sections,total};
