@@ -128,14 +128,8 @@ function financeReportData(month,selection=null){
  const selected=selection||new Set(['avulsos','individuais',...classes.map(c=>'class:'+c.id)]);
  const regularStudents=students.filter(s=>s.type!=='particular');
  if(selected.has('avulsos')&&regularStudents.length){
-  const rows=regularStudents.map(s=>{
-   const paid=paidFor(s.id,month),pct=groupPercent(s),academy=academyFor(s,month),teacher=paid-academy;
-   return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(Math.max(0,Number(s.amount)-paid))+' | academia '+pct+'% ('+money(academy)+') | professor '+(100-pct)+'% ('+money(teacher)+')';
-  });
-  const subtotal=regularStudents.reduce((sum,s)=>sum+academyFor(s,month),0);
-  const received=regularStudents.reduce((sum,s)=>sum+paidFor(s.id,month),0);
-  rows.push('TOTAL RECEBIDO: '+money(received)+' | REPASSE ACADEMIA: '+money(subtotal)+' | PROFESSOR: '+money(received-subtotal));
-  sections.push({title:'ALUNOS AVULSOS',rows,subtotalLabel:'REPASSE DA ACADEMIA — ALUNOS AVULSOS',subtotal});
+  const rows=regularStudents.map(s=>s.name);
+  sections.push({title:'ALUNOS AVULSOS',rows,showSubtotal:false});
  }
  classes.filter(c=>selected.has('class:'+c.id)).forEach(c=>{
   const roster=c.students||[];
@@ -163,10 +157,7 @@ function financeReportData(month,selection=null){
  };
  const privateStudents=students.filter(s=>s.type==='particular'&&!classStudentIds.has(s.id)&&!belongsToClass(s));
  if(selected.has('individuais')&&privateStudents.length){
-  const rows=privateStudents.map(s=>{
-   const lessons=lessonsFor(s,month),teacher=lessons*10;
-   return s.name+' — '+lessons+' aulas × '+money(10)+' = professor '+money(teacher);
-  });
+  const rows=privateStudents.map(s=>s.name);
   sections.push({title:'AULA INDIVIDUAL',rows,showSubtotal:false});
  }
  const total=sections.reduce((sum,section)=>sum+(section.subtotal||0),0);
