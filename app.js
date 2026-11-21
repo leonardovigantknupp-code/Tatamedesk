@@ -138,7 +138,7 @@ function financeReportData(month,selection=null){
   const className=String(c.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR');
   const isIndividualClass=className.includes('individual')||className.includes('particular');
   const individualRoster=isIndividualClass?roster:roster.filter(s=>students.some(globalStudent=>globalStudent.id===s.id&&globalStudent.type==='particular'));
-  if(selected.has('individuais')){
+  if(selected.has('individuais')||selected.has('class:'+c.id)){
    individualRoster.forEach(s=>{
     if(individualIds.has(s.id))return;
     individualIds.add(s.id);
