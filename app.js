@@ -217,7 +217,7 @@ $('#share-finance').onclick=async()=>{
   const blob=doc.output('blob');
   const file=new File([blob],'TatameDesk-Resumo-Financeiro-'+month+'.pdf',{type:'application/pdf'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-   try{await navigator.share({title:'Resumo financeiro TatameDesk',text:'Resumo do repasse da academia — '+month,fileName:file.name,files:[file]});return;}
+   try{await navigator.share({title:'Resumo financeiro TatameDesk',text:'Resumo do repasse da academia — '+month,files:[file]});return;}
    catch(error){if(error?.name==='AbortError')return;}
   }
   const url=URL.createObjectURL(blob),link=document.createElement('a');
