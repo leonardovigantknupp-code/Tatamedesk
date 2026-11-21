@@ -132,6 +132,7 @@ function financeReportData(month,selection=null){
   if(rows.length)sections.push({title:'ALUNOS AVULSOS',rows,showSubtotal:false});
  }
  const individualRows=[];
+ let individualTotal=0;
  const individualIds=new Set();
  classes.filter(c=>selected.has('class:'+c.id)||selected.has('individuais')).forEach(c=>{
   const roster=c.students||[];
@@ -143,6 +144,7 @@ function financeReportData(month,selection=null){
     if(individualIds.has(s.id))return;
     individualIds.add(s.id);
     const lessons=Number(s.lessonsByMonth?.[month]||0),total=lessons*10;
+    individualTotal+=total;
     individualRows.push(s.name+' — '+lessons+' aulas × '+money(10)+' = '+money(total));
    });
   }
@@ -171,9 +173,10 @@ function financeReportData(month,selection=null){
  if(selected.has('individuais')){
   privateStudents.forEach(s=>{
    const lessons=lessonsFor(s,month),total=lessons*10;
+   individualTotal+=total;
    individualRows.push(s.name+' — '+lessons+' aulas × '+money(10)+' = '+money(total));
   });
-  if(individualRows.length)sections.push({title:'AULAS INDIVIDUAIS',rows:individualRows,showSubtotal:false});
+  if(individualRows.length)sections.push({title:'AULAS INDIVIDUAIS',rows:individualRows,subtotalLabel:'REPASSE DA ACADEMIA — AULAS INDIVIDUAIS',subtotal:individualTotal});
  }
  const total=sections.reduce((sum,section)=>sum+(section.subtotal||0),0);
  return {sections,total};
