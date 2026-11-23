@@ -28,3 +28,6 @@
 /* Olhos de privacidade no gráfico e no repasse */
 .finance-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
 .finance-panel-heading h3{margin:0}
+
+/* Recorrência semanal */
+.recurrence-box{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px;margin:12px 0}.weekday-picks{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0}.weekday-picks label{display:flex;align-items:center;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:13px}.weekday-picks input{accent-color:var(--gold)}.hint{display:block;color:var(--muted);font-size:12px;margin-top:7px}.event-complete{border:0;border-radius:8px;padding:8px 10px;background:var(--panel2);color:var(--text);font-weight:700;cursor:pointer}.event-card.completed .event-info{text-decoration:line-through;opacity:.65}.event-card.completed .event-complete{color:var(--green)}
