@@ -1,5 +1,5 @@
-const CACHE='tatamedesk-v31';
-const FILES=['./','./index.html','./style.css?v=31','./app.js?v=31','./manifest.json','./icon.svg'];
+const CACHE='tatamedesk-v32';
+const FILES=['./','./index.html','./style.css?v=32','./app.js?v=31','./manifest.json','./icon.svg','./profile.js?v=32'];
 
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
