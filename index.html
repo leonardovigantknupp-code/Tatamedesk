@@ -4,13 +4,13 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#14201b"><meta name="description" content="TatameDesk - agenda pessoal e operacional">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg">
-<title>TatameDesk</title><link rel="stylesheet" href="style.css?v=27">
+<title>TatameDesk</title><link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
 <div class="app-shell">
 <aside class="sidebar">
   <div class="brand"><div class="brand-mark">TD</div><div><strong>TatameDesk</strong><small>Agenda do professor</small></div></div>
-  <nav><button class="nav active" data-view="today">◷ <span>Hoje</span></button><button class="nav" data-view="calendar">▦ <span>Calendário</span></button><button class="nav" data-view="tasks">✓ <span>Tarefas</span></button><button class="nav" data-view="classes">🥋 <span>Turmas</span></button><button class="nav" data-view="finance">R$ <span>Financeiro</span></button></nav>
+  <nav><button class="nav active" data-view="today">◷ <span>Hoje</span></button><button class="nav" data-view="calendar">▦ <span>Calendário</span></button><button class="nav" data-view="tasks">✓ <span>Tarefas</span></button><button class="nav" data-view="classes">👥 <span>Turmas</span></button><button class="nav" data-view="finance">R$ <span>Financeiro</span></button></nav>
   <div class="sidebar-bottom"><span class="status-dot"></span> Seus dados ficam neste dispositivo</div>
 </aside>
 <main class="main">
@@ -58,5 +58,5 @@
 <dialog id="class-student-dialog"><form method="dialog" id="class-student-form"><div class="modal-head"><h2 id="class-student-title">Adicionar aluno</h2><button class="icon-btn close" value="cancel">×</button></div><input type="hidden" id="class-student-id"><label>Nome do aluno<input id="class-student-name" required></label><label>Valor mensal (R$)<input id="class-student-amount" type="number" min="0" step="0.01" required></label><div class="modal-actions"><button type="button" class="danger hidden" id="delete-class-student">Excluir aluno</button><span class="spacer"></span><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Salvar aluno</button></div></form></dialog>
 <dialog id="class-payment-dialog"><form method="dialog" id="class-payment-form"><div class="modal-head"><h2>Registrar pagamento</h2><button class="icon-btn close" value="cancel">×</button></div><input type="hidden" id="class-payment-student"><label>Aluno<input id="class-payment-name" disabled></label><label>Valor recebido (R$)<input id="class-payment-amount" type="number" min="0.01" step="0.01" required></label><label>Data<input id="class-payment-date" type="date" required></label><div class="modal-actions"><span class="spacer"></span><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Confirmar</button></div></form></dialog>
 <dialog id="finance-report-dialog"><form method="dialog" id="finance-report-form"><div class="modal-head"><div><p class="eyebrow">FECHAMENTO FINANCEIRO</p><h2>O que deseja incluir?</h2></div><button class="icon-btn close" value="cancel">×</button></div><p class="muted">Marque uma, várias ou todas as opções. O PDF mostrará cada repasse separado e o total dos itens selecionados.</p><div id="finance-report-options"></div><div class="modal-actions"><button class="secondary" value="cancel">Cancelar</button><button class="primary" value="default">Gerar fechamento em PDF</button></div></form></dialog><div class="toast" id="toast"></div><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" onerror="this.onerror=function(){this.onerror=null;this.src='https://unpkg.com/jspdf@2.5.2/dist/jspdf.umd.min.js';};this.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';" crossorigin="anonymous"></script>
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 </body></html>
