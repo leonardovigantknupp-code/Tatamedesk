@@ -106,14 +106,15 @@ function groupPercent(s){let g=groups.find(x=>x.id===s.groupId);return Number(g?
 function lessonsFor(s,m){return Math.max(0,Number(s.lessonsByMonth?.[m]||0))}
 function academyFor(s,m){return s.type==='particular'?lessonsFor(s,m)*10:paidFor(s.id,m)*groupPercent(s)/100}
 window.setPrivateLessons=(id,value)=>{let s=students.find(x=>x.id===id);if(!s)return;s.lessonsByMonth=s.lessonsByMonth||{};s.lessonsByMonth[currentMonth()]=Math.max(0,Math.floor(Number(value)||0));save();renderFinance()};
-function paidFor(sid,month){return payments.filter(p=>p.studentId===sid&&p.month===month).reduce((a,p)=>a+Number(p.amount),0)}
-function classPaid(c,sid,month){return (c.payments||[]).filter(p=>p.studentId===sid&&p.month===month).reduce((a,p)=>a+Number(p.amount||0),0)}
+const paymentIsActive=p=>p.status!=='estornado';
+function paidFor(sid,month){return payments.filter(p=>paymentIsActive(p)&&p.studentId===sid&&p.month===month).reduce((a,p)=>a+Number(p.amount),0)}
+function classPaid(c,sid,month){return (c.payments||[]).filter(p=>paymentIsActive(p)&&p.studentId===sid&&p.month===month).reduce((a,p)=>a+Number(p.amount||0),0)}
 function classAcademy(c,month){
  if(c.financeModel==='perLesson')return (c.students||[]).reduce((a,s)=>a+Number(s.lessonsByMonth?.[month]||0)*Number(c.academyRate||0),0);
- const received=(c.payments||[]).filter(p=>p.month===month).reduce((a,p)=>a+Number(p.amount||0),0);
+ const received=(c.payments||[]).filter(p=>paymentIsActive(p)&&p.month===month).reduce((a,p)=>a+Number(p.amount||0),0);
  return received*Number(c.academyPercent??60)/100;
 }
-window.historyClassStudent=(classId,studentId)=>{let c=classes.find(x=>x.id===classId),s=c?.students?.find(x=>x.id===studentId);if(!c||!s)return;let h=(c.payments||[]).filter(p=>p.studentId===studentId).sort((a,b)=>b.date.localeCompare(a.date));alert('Histórico de '+s.name+' — '+c.name+'\\n'+(h.length?h.map(p=>p.date.split('-').reverse().join('/')+' — '+money(p.amount)).join('\\n'):'Nenhum pagamento registrado'))};
+window.historyClassStudent=(classId,studentId)=>{let c=classes.find(x=>x.id===classId),s=c?.students?.find(x=>x.id===studentId);if(!c||!s)return;let h=(c.payments||[]).filter(p=>p.studentId===studentId).sort((a,b)=>b.date.localeCompare(a.date));alert('Histórico de '+s.name+' — '+c.name+'\\n'+(h.length?h.map(p=>p.date.split('-').reverse().join('/')+' — '+money(p.amount)+(p.status==='estornado'?' — ESTORNADO':'')).join('\\n'):'Nenhum pagamento registrado'))};
 window.payClassStudentFromFinance=(classId,studentId)=>{activeClassId=classId;$('#detail-month').value=currentMonth();window.payClassStudent(studentId)};
 window.editClassStudentFromFinance=(classId,studentId)=>{activeClassId=classId;$('#detail-month').value=currentMonth();window.editClassStudent(studentId)};
 window.setClassLessonsFromFinance=(classId,studentId,value)=>{let c=classes.find(x=>x.id===classId),s=c?.students?.find(x=>x.id===studentId);if(!s)return;s.lessonsByMonth=s.lessonsByMonth||{};s.lessonsByMonth[currentMonth()]=Math.max(0,Math.floor(Number(value)||0));save();renderFinance()};
@@ -122,8 +123,8 @@ function renderFinance(){
  if(!$('#finance-month').value)$('#finance-month').value=todayISO().slice(0,7);
  const m=currentMonth(),classStudents=classes.flatMap(c=>(c.students||[]).map(s=>({student:s,cls:c})));
  const expected=students.reduce((a,s)=>a+Number(s.amount||0),0)+classStudents.reduce((a,x)=>a+Number(x.student.amount||0),0);
- const globalReceived=payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount||0),0);
- const classReceived=classes.reduce((a,c)=>a+(c.payments||[]).filter(p=>p.month===m).reduce((b,p)=>b+Number(p.amount||0),0),0);
+ const globalReceived=payments.filter(p=>paymentIsActive(p)&&p.month===m).reduce((a,p)=>a+Number(p.amount||0),0);
+ const classReceived=classes.reduce((a,c)=>a+(c.payments||[]).filter(p=>paymentIsActive(p)&&p.month===m).reduce((b,p)=>b+Number(p.amount||0),0),0);
  const received=globalReceived+classReceived;
  const pending=students.reduce((a,s)=>a+Math.max(0,Number(s.amount||0)-paidFor(s.id,m)),0)+classStudents.reduce((a,x)=>a+Math.max(0,Number(x.student.amount||0)-classPaid(x.cls,x.student.id,m)),0);
  updateFinanceValue('expected',expected);updateFinanceValue('received',received);updateFinanceValue('pending',pending);
@@ -142,11 +143,32 @@ $('#finance-month').onchange=renderFinance;
 $('#add-student').onclick=()=>{ $('#student-form').reset();$('#student-id').value='';$('#student-modal-title').textContent='Cadastrar aluno';$('#delete-student').classList.add('hidden');$('#student-group').value=groups[0]?.id||'';$('#student-lessons').value=0;$('#student-lessons-field').classList.toggle('hidden',$('#student-type').value!=='particular');$('#student-dialog').showModal() };
 $('#student-type').onchange=()=>$('#student-lessons-field').classList.toggle('hidden',$('#student-type').value!=='particular');
 $('#student-form').onsubmit=e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();let id=$('#student-id').value||crypto.randomUUID(),old=students.find(s=>s.id===id),s={...(old||{}),id,name:$('#student-name').value.trim(),type:$('#student-type').value,groupId:$('#student-group').value,amount:Number($('#student-amount').value),lessonsByMonth:{...(old?.lessonsByMonth||{})}};if(s.type==='particular')s.lessonsByMonth[currentMonth()]=Math.max(0,Math.floor(Number($('#student-lessons').value)||0));students=old?students.map(x=>x.id===id?s:x):[...students,s];save();$('#student-dialog').close();render();toast('Aluno salvo')};
-window.editStudent=id=>{let s=students.find(x=>x.id===id);if(!s)return;$('#student-id').value=id;$('#student-name').value=s.name;$('#student-type').value=s.type;$('#student-group').value=s.groupId;$('#student-amount').value=s.amount;$('#student-lessons').value=lessonsFor(s,currentMonth());$('#student-lessons-field').classList.toggle('hidden',s.type!=='particular');$('#student-modal-title').textContent='Editar aluno';$('#delete-student').classList.remove('hidden');$('#student-dialog').showModal()};
+window.editStudent=id=>{let s=students.find(x=>x.id===id);if(!s)return;$('#student-id').value=id;$('#student-name').value=s.name;$('#student-type').value=s.type;$('#student-group').value=s.groupId;$('#student-amount').value=s.amount;$('#student-lessons').value=lessonsFor(s,currentMonth());$('#student-lessons-field').classList.toggle('hidden',s.type!=='particular');$('#student-modal-title').textContent='Editar aluno';$('#delete-student').classList.remove('hidden');renderStudentReversals('global',id);$('#student-dialog').showModal()};
 $('#delete-student').onclick=()=>{let id=$('#student-id').value;if(!confirm('Excluir este aluno? O histórico de pagamentos também será excluído.'))return;students=students.filter(s=>s.id!==id);payments=payments.filter(p=>p.studentId!==id);save();$('#student-dialog').close();render();toast('Aluno excluído')};
 window.payStudent=id=>{let s=students.find(x=>x.id===id);if(!s)return;$('#payment-form').reset();$('#payment-student').value=id;$('#payment-student-name').value=s.name;$('#payment-amount').value=Math.max(0,Number(s.amount)-paidFor(id,currentMonth())).toFixed(2);$('#payment-date').value=todayISO();$('#payment-dialog').showModal()};
 $('#payment-form').onsubmit=e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();let date=$('#payment-date').value;payments.push({id:crypto.randomUUID(),studentId:$('#payment-student').value,amount:Number($('#payment-amount').value),date,month:date.slice(0,7),note:$('#payment-note').value.trim()});save();$('#payment-dialog').close();render();toast('Pagamento registrado')};
-window.historyStudent=id=>{let s=students.find(x=>x.id===id),h=payments.filter(p=>p.studentId===id).sort((a,b)=>b.date.localeCompare(a.date));alert('Histórico de '+s.name+'\\n'+(h.length?h.map(p=>p.date.split('-').reverse().join('/')+' — '+money(p.amount)+(p.note?' ('+p.note+')':'')).join('\\n'):'Nenhum pagamento registrado'))};
+window.historyStudent=id=>{let s=students.find(x=>x.id===id),h=payments.filter(p=>p.studentId===id).sort((a,b)=>b.date.localeCompare(a.date));alert('Histórico de '+s.name+'\\n'+(h.length?h.map(p=>p.date.split('-').reverse().join('/')+' — '+money(p.amount)+(p.note?' ('+p.note+')':'')+(p.status==='estornado'?' — ESTORNADO':'')).join('\\n'):'Nenhum pagamento registrado'))};
+function renderStudentReversals(scope,studentId){
+ const host=$(scope==='global'?'#student-reversals':'#class-student-reversals');
+ if(!host)return;
+ const list=scope==='global'?payments.filter(p=>p.studentId===studentId):(classes.find(c=>c.id===activeClassId)?.payments||[]).filter(p=>p.studentId===studentId);
+ const sorted=[...list].sort((a,b)=>b.date.localeCompare(a.date));
+ host.innerHTML=sorted.length?sorted.map(p=>'<div class="reversal-row"><div><strong>'+money(p.amount)+'</strong><small>'+String(p.date||'').split('-').reverse().join('/')+(p.note?' • '+esc(p.note):'')+'</small></div>'+(p.status==='estornado'?'<span class="reversal-done">ESTORNADO</span>':'<button type="button" class="danger small" onclick="reverseStudentPayment(\''+scope+'\',\''+esc(p.id)+'\')">Estornar</button>')+'</div>').join(''):'<p class="hint">Nenhum pagamento registrado para este aluno.</p>';
+}
+window.reverseStudentPayment=(scope,paymentId)=>{
+ let list=scope==='global'?payments:(classes.find(c=>c.id===activeClassId)?.payments||[]);
+ let p=list.find(x=>x.id===paymentId);
+ if(!p||p.status==='estornado')return;
+ let student=scope==='global'?students.find(s=>s.id===p.studentId):classes.find(c=>c.id===activeClassId)?.students?.find(s=>s.id===p.studentId);
+ if(!student)return;
+ const date=String(p.date||'').split('-').reverse().join('/');
+ if(!confirm('Confirmar estorno deste pagamento de '+student.name+'?\\nValor: '+money(p.amount)+'\\nData: '+date+'\\n\\nO registro será mantido no histórico, mas deixará de contar no financeiro.'))return;
+ p.status='estornado';p.reversedAt=new Date().toISOString();save();
+ renderStudentReversals(scope,p.studentId);
+ if(scope==='global')renderFinance();
+ else{renderClassDetail();renderClasses();renderFinance()}
+ toast('Pagamento estornado');
+};
 $('#add-group').onclick=()=>{$('#group-form').reset();$('#group-percent').value=60;$('#group-form').dataset.edit='';$('#group-dialog').showModal()};
 $('#group-form').onsubmit=e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();let id=$('#group-form').dataset.edit,name=$('#group-name').value.trim(),percent=Number($('#group-percent').value);if(id)groups=groups.map(g=>g.id===id?{...g,name,percent}:g);else groups.push({id:crypto.randomUUID(),name,percent});save();$('#group-dialog').close();render();toast('Grupo salvo')};
 window.editGroup=id=>{let g=groups.find(x=>x.id===id);if(!g)return;$('#group-name').value=g.name;$('#group-percent').value=g.percent;$('#group-form').dataset.edit=id;$('#group-dialog').showModal()};
@@ -199,7 +221,7 @@ function financeReportData(month,selection=null){
    return s.name+' — previsto '+money(s.amount)+' | recebido '+money(paid)+' | pendente '+money(due)+' | academia '+academyPct+'% ('+money(academy)+') | professor '+teacherPct+'% ('+money(teacher)+')';
   });
   const regularIds=new Set(regularRoster.map(s=>s.id));
-  const regularPayments=(c.payments||[]).filter(p=>regularIds.has(p.studentId));
+  const regularPayments=(c.payments||[]).filter(p=>paymentIsActive(p)&&regularIds.has(p.studentId));
   const regularClass={...c,students:regularRoster,payments:regularPayments};
   const received=regularPayments.filter(p=>p.month===month).reduce((sum,p)=>sum+Number(p.amount||0),0);
   const academy=classAcademy(regularClass,month),teacher=received-academy;
@@ -304,13 +326,13 @@ $('#finance-report-form').onsubmit=async e=>{
 let activeClassId=null;
 window.editClass=id=>{let c=classes.find(x=>x.id===id);if(c)openClassEditor(c)};
 const detailMonth=()=>$('#detail-month').value||todayISO().slice(0,7);
-const classPayments=(c,sid,m)=>((c.payments||[]).filter(p=>p.studentId===sid&&p.month===m).reduce((a,p)=>a+Number(p.amount),0));
+const classPayments=(c,sid,m)=>((c.payments||[]).filter(p=>paymentIsActive(p)&&p.studentId===sid&&p.month===m).reduce((a,p)=>a+Number(p.amount),0));
 const brl=v=>money(v);
 window.openClassDetail=id=>{activeClassId=id;let c=classes.find(x=>x.id===id);if(!c)return;$('#detail-class-title').textContent=c.name;$('#detail-month').value=todayISO().slice(0,7);renderClassDetail();$('#class-detail-dialog').showModal()};
 $('#close-class-detail').onclick=()=>$('#class-detail-dialog').close();
 $('#edit-current-class').onclick=()=>{let c=classes.find(x=>x.id===activeClassId);$('#class-detail-dialog').close();if(c)openClassEditor(c)};
 $('#detail-month').onchange=renderClassDetail;
-function renderClassDetail(){let c=classes.find(x=>x.id===activeClassId);if(!c)return;c.students=c.students||[];c.payments=c.payments||[];let m=detailMonth(),expected=c.students.reduce((a,s)=>a+Number(s.amount||0),0),received=c.payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount),0),pending=c.students.reduce((a,s)=>a+Math.max(0,Number(s.amount)-classPayments(c,s.id,m)),0);
+function renderClassDetail(){let c=classes.find(x=>x.id===activeClassId);if(!c)return;c.students=c.students||[];c.payments=c.payments||[];let m=detailMonth(),expected=c.students.reduce((a,s)=>a+Number(s.amount||0),0),received=c.payments.filter(p=>paymentIsActive(p)&&p.month===m).reduce((a,p)=>a+Number(p.amount),0),pending=c.students.reduce((a,s)=>a+Math.max(0,Number(s.amount)-classPayments(c,s.id,m)),0);
 $('#detail-expected').textContent=brl(expected);$('#detail-received').textContent=brl(received);$('#detail-pending').textContent=brl(pending);
 let academy=0,teacher=0,detailLines=[];
 if(c.financeModel==='perLesson'){academy=c.students.reduce((a,s)=>a+Number(s.lessonsByMonth?.[m]||0)*Number(c.academyRate||0),0);teacher=received-academy;$('#detail-share-title').textContent='Repasse por aula realizada';$('#detail-share').textContent='Academia: '+brl(academy)+' ('+brl(c.academyRate)+' × aulas realizadas) • Professor: '+brl(teacher)+'.';}
@@ -319,14 +341,14 @@ $('#detail-students').innerHTML=c.students.length?c.students.map(s=>{let paid=cl
 }
 $('#add-class-student').onclick=()=>{if(!activeClassId)return;$('#class-student-form').reset();$('#class-student-id').value='';$('#class-student-title').textContent='Adicionar aluno';$('#delete-class-student').classList.add('hidden');$('#class-student-dialog').showModal()};
 $('#class-student-form').onsubmit=e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();let c=classes.find(x=>x.id===activeClassId);if(!c)return;c.students=c.students||[];let id=$('#class-student-id').value||crypto.randomUUID(),old=c.students.find(s=>s.id===id),s={...(old||{}),id,name:$('#class-student-name').value.trim(),amount:Number($('#class-student-amount').value)};c.students=old?c.students.map(x=>x.id===id?s:x):[...c.students,s];save();$('#class-student-dialog').close();renderClassDetail();renderClasses();renderFinance();renderFinance();toast('Aluno salvo na turma')};
-window.editClassStudent=id=>{let c=classes.find(x=>x.id===activeClassId),s=c?.students?.find(x=>x.id===id);if(!s)return;$('#class-student-id').value=id;$('#class-student-name').value=s.name;$('#class-student-amount').value=s.amount;$('#class-student-title').textContent='Editar aluno';$('#delete-class-student').classList.remove('hidden');$('#class-student-dialog').showModal()};
+window.editClassStudent=id=>{let c=classes.find(x=>x.id===activeClassId),s=c?.students?.find(x=>x.id===id);if(!s)return;$('#class-student-id').value=id;$('#class-student-name').value=s.name;$('#class-student-amount').value=s.amount;$('#class-student-title').textContent='Editar aluno';$('#delete-class-student').classList.remove('hidden');renderStudentReversals('class',id);$('#class-student-dialog').showModal()};
 $('#delete-class-student').onclick=()=>{let c=classes.find(x=>x.id===activeClassId),id=$('#class-student-id').value;if(!c)return;if(!confirm('Excluir aluno e seus pagamentos desta turma?'))return;c.students=c.students.filter(s=>s.id!==id);c.payments=(c.payments||[]).filter(p=>p.studentId!==id);save();$('#class-student-dialog').close();renderClassDetail();renderClasses()};
 window.payClassStudent=id=>{let c=classes.find(x=>x.id===activeClassId),s=c?.students?.find(x=>x.id===id);if(!s)return;$('#class-payment-form').reset();$('#class-payment-student').value=id;$('#class-payment-name').value=s.name;$('#class-payment-amount').value=Math.max(0,Number(s.amount)-classPayments(c,id,detailMonth())).toFixed(2);$('#class-payment-date').value=todayISO();$('#class-payment-dialog').showModal()};
 $('#class-payment-form').onsubmit=e=>{if(e.submitter?.value==='cancel')return;e.preventDefault();let c=classes.find(x=>x.id===activeClassId),date=$('#class-payment-date').value;if(!c)return;c.payments=c.payments||[];c.payments.push({id:crypto.randomUUID(),studentId:$('#class-payment-student').value,amount:Number($('#class-payment-amount').value),date,month:date.slice(0,7)});save();$('#class-payment-dialog').close();renderClassDetail();renderClasses();renderFinance();toast('Pagamento registrado')};
 window.setStudentLessons=(id,value)=>{let c=classes.find(x=>x.id===activeClassId),s=c?.students?.find(x=>x.id===id);if(!s)return;s.lessonsByMonth=s.lessonsByMonth||{};s.lessonsByMonth[detailMonth()]=Math.max(0,Number(value)||0);save();renderClassDetail();renderFinance()};
 $('#share-class').onclick=async()=>{
  let c=classes.find(x=>x.id===activeClassId);if(!c)return;
- let m=detailMonth(),received=c.payments.filter(p=>p.month===m).reduce((a,p)=>a+Number(p.amount),0);
+ let m=detailMonth(),received=c.payments.filter(p=>paymentIsActive(p)&&p.month===m).reduce((a,p)=>a+Number(p.amount),0);
  let academy=c.financeModel==='perLesson'?c.students.reduce((a,s)=>a+Number(s.lessonsByMonth?.[m]||0)*Number(c.academyRate||0),0):received*Number(c.academyPercent??60)/100;
  let rows=c.students.map(s=>{
   let lessons=Number(s.lessonsByMonth?.[m]||0);
