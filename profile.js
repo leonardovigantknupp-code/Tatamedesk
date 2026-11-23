@@ -25,14 +25,14 @@ function inject(){
  document.body.appendChild(h);
 }
 function update(){['profile-trigger','profile-preview','lock-avatar'].forEach(id=>{let x=$('#'+id);if(x)x.innerHTML=avatar()});$('#profile-menu-name').textContent=p.name||'Meu perfil';$('#profile-menu-email').textContent=p.email||'Configurar e-mail';$('#lock-user-name').textContent=p.name||''}
-function lock(){if(!p.pinHash||p.lockMode==='never'||locked)return;locked=true;$('#profile-lock-screen').classList.remove('hidden');$('#unlock-pin').value='';$('#unlock-error').textContent='';setTimeout(()=>$('#unlock-pin').focus(),100)}
+function lock(force=false){if(!p.pinHash||(!force&&p.lockMode==='never')||locked)return;locked=true;$('#profile-lock-screen').classList.remove('hidden');$('#unlock-pin').value='';$('#unlock-error').textContent='';setTimeout(()=>$('#unlock-pin').focus(),100)}
 function settings(){p=JSON.parse(localStorage.getItem(KEY)||'{}');$('#profile-name').value=p.name||'';$('#profile-email').value=p.email||'';$('#profile-phone').value=p.phone||'';$('#profile-pin').value='';$('#profile-pin-confirm').value='';$('#profile-lock-mode').value=p.lockMode||'never';$('#profile-pin-status').textContent=p.pinHash?'PIN configurado. Digite outro apenas para alterá-lo.':'Nenhum PIN configurado.';$('#profile-dialog').showModal();$('#profile-menu').classList.add('hidden')}
 async function start(){
  inject();update();
  $('#profile-trigger').onclick=()=>$('#profile-menu').classList.toggle('hidden');
  document.addEventListener('click',e=>{if(!e.target.closest('#profile-menu')&&!e.target.closest('#profile-trigger'))$('#profile-menu').classList.add('hidden')});
  $('#profile-settings').onclick=settings;
- $('#profile-lock').onclick=()=>{if(!p.pinHash){alert('Configure um PIN primeiro.');settings()}else lock();$('#profile-menu').classList.add('hidden')};
+ $('#profile-lock').onclick=()=>{if(!p.pinHash){alert('Configure um PIN primeiro.');settings()}else lock(true);$('#profile-menu').classList.add('hidden')};
  $('#profile-photo').onchange=e=>{let f=e.target.files?.[0];if(!f)return;if(f.size>2*1024*1024){alert('A foto deve ter até 2 MB.');return}let r=new FileReader();r.onload=()=>{p.photo=r.result;$('#profile-preview').innerHTML=avatar()};r.readAsDataURL(f)};
  $('#profile-remove-photo').onclick=()=>{p.photo='';$('#profile-preview').innerHTML=avatar()};
  $('#profile-disable-pin').onclick=()=>{if(confirm('Desativar o PIN?')){p.pinHash='';p.pinSalt='';p.lockMode='never';$('#profile-lock-mode').value='never';$('#profile-pin-status').textContent='PIN desativado.'}};
