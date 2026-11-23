@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#14201b"><meta name="description" content="TatameDesk - agenda pessoal e operacional">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg">
-<title>TatameDesk</title><link rel="stylesheet" href="style.css?v=28">
+<title>TatameDesk</title><link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
 <div class="app-shell">
@@ -46,6 +46,7 @@
 <input type="hidden" id="event-id"><label>Título<input id="event-title" required maxlength="90" placeholder="Ex.: Aula de Jiu-Jitsu"></label>
 <label>Descrição / observações<textarea id="event-desc" rows="2" placeholder="Detalhes (opcional)"></textarea></label>
 <div class="form-row"><label>Data<input id="event-date" type="date" required></label><label>Categoria<select id="event-category"><option>Aula</option><option>Reunião</option><option>Pessoal</option><option>Tarefa</option><option>Outro</option></select></label></div>
+<div class="recurrence-box"><label>Repetição<select id="event-repeat"><option value="once">Aula única</option><option value="weekly">Toda semana</option></select></label><div id="event-weekdays" class="hidden"><span class="hint">Marque os dias da semana</span><div class="weekday-picks"><label><input type="checkbox" name="event-weekday" value="0">Dom</label><label><input type="checkbox" name="event-weekday" value="1">Seg</label><label><input type="checkbox" name="event-weekday" value="2">Ter</label><label><input type="checkbox" name="event-weekday" value="3">Qua</label><label><input type="checkbox" name="event-weekday" value="4">Qui</label><label><input type="checkbox" name="event-weekday" value="5">Sex</label><label><input type="checkbox" name="event-weekday" value="6">Sáb</label></div><small class="hint">A aula será exibida em cada dia marcado, a partir da data escolhida.</small></div></div>
 <div class="form-row"><label>Início<input id="event-start" type="time" value="08:00" required></label><label>Término<input id="event-end" type="time" value="09:00"></label></div>
 <div class="form-row"><label>Prioridade<select id="event-priority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></label><label>Lembrete<select id="event-reminder"><option value="0">Sem lembrete</option><option value="10">10 minutos antes</option><option value="30">30 minutos antes</option><option value="60">1 hora antes</option><option value="1440" selected>1 dia antes</option></select></label></div>
 <div class="modal-actions"><button type="button" class="danger hidden" id="delete-event">Excluir</button><span class="spacer"></span><button class="secondary" value="cancel">Cancelar</button><button class="primary" id="save-event" value="default">Salvar</button></div></form></dialog>
