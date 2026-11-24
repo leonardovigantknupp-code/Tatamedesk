@@ -36,3 +36,44 @@
 @media(max-width:760px){.brand{padding:0 4px 12px}.profile-menu{left:14px;top:62px}.profile-avatar{width:36px;height:36px;flex-basis:36px}}
 
 .reversal-section{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}.reversal-section h3{font:700 14px Manrope;margin:0 0 6px}.reversal-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.reversal-row strong,.reversal-row small{display:block}.reversal-row small{font-size:11px;color:var(--muted);margin-top:4px}.reversal-done{font-size:10px;font-weight:800;color:#ffb0b0;letter-spacing:.5px}
+
+
+/* Temas de cores do ALGES — preferência salva no perfil local */
+:root[data-alges-theme="emerald"]{
+ --bg:#101a18;--panel:#192522;--panel2:#202f29;--line:#30443a;--text:#edf5ef;--muted:#a0b3a7;
+ --gold:#15966b;--blue:#78b99a;--green:#55c995;--accent-soft:#263a31;--accent-border:#385448;
+ --input-bg:#141f1b;--input-border:#3b5144;--sidebar-bg:#141f1b;--dialog-bg:#192722;
+ --avatar-start:#20a879;--avatar-end:#0d684a;--accent-contrast:#14201b;--accent-hover:#31b887;--welcome-start:#203b30;--welcome-end:#1a2923;
+}
+:root[data-alges-theme="blue"]{
+ --bg:#101824;--panel:#182433;--panel2:#202f42;--line:#34475e;--text:#edf4ff;--muted:#a7b7ca;
+ --gold:#3b82f6;--blue:#93c5fd;--green:#60a5fa;--accent-soft:#1e3553;--accent-border:#365779;
+ --input-bg:#142238;--input-border:#365779;--sidebar-bg:#101d31;--dialog-bg:#17283f;
+ --avatar-start:#60a5fa;--avatar-end:#1d4ed8;--accent-contrast:#07172c;--accent-hover:#60a5fa;--welcome-start:#1e3a5f;--welcome-end:#17283f;
+}
+:root[data-alges-theme="purple"]{
+ --bg:#191426;--panel:#241d34;--panel2:#302642;--line:#49395f;--text:#f5efff;--muted:#b9abc9;
+ --gold:#9b6bdb;--blue:#c4a5f5;--green:#b08be8;--accent-soft:#3b2b54;--accent-border:#5b4675;
+ --input-bg:#20182f;--input-border:#5b4675;--sidebar-bg:#1c152b;--dialog-bg:#241b35;
+ --avatar-start:#c4a5f5;--avatar-end:#7544b8;--accent-contrast:#1c102b;--accent-hover:#b08be8;--welcome-start:#39264f;--welcome-end:#2b203d;
+}
+:root[data-alges-theme="amber"]{
+ --bg:#1b1914;--panel:#29251d;--panel2:#373024;--line:#514532;--text:#fff7e8;--muted:#c3b69d;
+ --gold:#d97706;--blue:#f2c078;--green:#e5a23e;--accent-soft:#44351f;--accent-border:#6a5433;
+ --input-bg:#211d16;--input-border:#6a5433;--sidebar-bg:#211c14;--dialog-bg:#2a241a;
+ --avatar-start:#f4c46b;--avatar-end:#b45309;--accent-contrast:#241606;--accent-hover:#f0a52d;--welcome-start:#4a351a;--welcome-end:#302719;
+}
+.sidebar{background:var(--sidebar-bg)}
+.brand-mark,.profile-avatar{background:linear-gradient(135deg,var(--avatar-start),var(--avatar-end));color:var(--accent-contrast)}
+.nav.active,.nav:hover,.secondary,.icon-btn,.event-menu-options button:hover,.profile-menu button:hover,.event-complete{background:var(--accent-soft)}
+.primary{background:var(--gold);color:var(--accent-contrast)}
+.primary:hover{background:var(--accent-hover)}
+.welcome{background:linear-gradient(110deg,var(--welcome-start),var(--welcome-end));border-color:var(--accent-border)}
+.date-chip{background:var(--input-bg);border-color:var(--accent-border)}
+.day.selected{background:var(--accent-soft)}
+dialog{background:var(--dialog-bg);border-color:var(--accent-border)}
+input,textarea,select{background:var(--input-bg);border-color:var(--input-border)}
+.finance-eye{background:var(--input-bg)}
+.profile-lock-screen{background:var(--bg)}
+.profile-appearance{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}
+.profile-appearance h3{font:700 15px Manrope;margin:0 0 6px}
