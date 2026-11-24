@@ -214,3 +214,50 @@ input,textarea,select{background:var(--input-bg);border-color:var(--input-border
 :root[data-alges-theme="blue"] dialog::backdrop,
 :root[data-alges-theme="amber"] dialog::backdrop,
 :root[data-alges-theme="purple"] dialog::backdrop{backdrop-filter:none}
+
+
+/* ALGES — tema 5: preto, branco, vermelho e amarelo */
+:root[data-alges-theme="blackred"]{
+ --bg:#090909;--panel:#151515;--panel2:#222222;--line:#393939;--text:#f7f7f7;--muted:#b8b8b8;
+ --gold:#f2c400;--blue:#f2c400;--green:#f2c400;--red:#ed2939;
+ --accent-soft:#321719;--accent-border:#8f2029;
+ --input-bg:#111111;--input-border:#494949;--sidebar-bg:#101010;--dialog-bg:#171717;
+ --avatar-start:#ed2939;--avatar-end:#a30f1d;--accent-contrast:#ffffff;--accent-hover:#ffd633;
+ --welcome-start:#2b1013;--welcome-end:#171717;
+}
+:root[data-alges-theme="blackred"] .welcome{background:linear-gradient(110deg,#2b1013,#171717);border-color:#8f2029}
+:root[data-alges-theme="blackred"] .welcome h2{color:#fff}
+:root[data-alges-theme="blackred"] .primary{background:#ed2939;color:#fff}
+:root[data-alges-theme="blackred"] .primary:hover{background:#ff4654}
+:root[data-alges-theme="blackred"] .eyebrow,
+:root[data-alges-theme="blackred"] .date-chip,
+:root[data-alges-theme="blackred"] .event-time,
+:root[data-alges-theme="blackred"] .repasse-value,
+:root[data-alges-theme="blackred"] .text-btn{color:#f2c400}
+:root[data-alges-theme="blackred"] .nav.active,
+:root[data-alges-theme="blackred"] .nav:hover{color:#f2c400;background:#321719}
+:root[data-alges-theme="blackred"] .danger{background:#4a171c;color:#ffb5bb}
+:root[data-alges-theme="blackred"] .pill{background:#332a08;color:#ffe36a}
+:root[data-alges-theme="blackred"] .bar-track{background:#303030}
+:root[data-alges-theme="blackred"] .bar.received{background:#f2c400}
+:root[data-alges-theme="blackred"] .bar.pending{background:#ed2939}
+:root[data-alges-theme="blackred"] .day.selected{background:#321719;border-color:#ed2939}
+:root[data-alges-theme="blackred"] .day.today{box-shadow:inset 0 0 0 1px #f2c400}
+:root[data-alges-theme="blackred"] .day i,
+:root[data-alges-theme="blackred"] .status-dot{background:#f2c400}
+:root[data-alges-theme="blackred"] .finance-eye{background:#111;color:#f2c400}
+:root[data-alges-theme="blackred"] .profile-lock-screen{background:#090909}
+:root[data-alges-theme="blackred"] dialog::backdrop{background:rgba(0,0,0,.78);backdrop-filter:none}
+:root[data-alges-theme="blackred"] .stats article,
+:root[data-alges-theme="blackred"] .event-card,
+:root[data-alges-theme="blackred"] .task-card,
+:root[data-alges-theme="blackred"] .class-card,
+:root[data-alges-theme="blackred"] .panel,
+:root[data-alges-theme="blackred"] .group-row,
+:root[data-alges-theme="blackred"] .student-row{box-shadow:0 2px 8px rgba(0,0,0,.28)}
+:root[data-alges-theme="blackred"] .event-menu-options button:hover,
+:root[data-alges-theme="blackred"] .profile-menu button:hover,
+:root[data-alges-theme="blackred"] .event-complete{background:#321719}
+:root[data-alges-theme="blackred"] input:focus,
+:root[data-alges-theme="blackred"] textarea:focus,
+:root[data-alges-theme="blackred"] select:focus{border-color:#f2c400}
