@@ -142,3 +142,75 @@ input,textarea,select{background:var(--input-bg);border-color:var(--input-border
 :root[data-alges-theme="emerald"] .brand-mark,
 :root[data-alges-theme="emerald"] .profile-avatar,
 :root[data-alges-theme="emerald"] .welcome{background-image:none}
+
+
+/* ALGES — identidades visuais distintas dos temas */
+:root[data-alges-theme="blue"]{
+ --bg:#0c1728;--panel:#14243a;--panel2:#1b304b;--line:#2b4564;--text:#edf5ff;--muted:#a9bdd5;
+ --gold:#3b82f6;--blue:#93c5fd;--green:#38bdf8;--red:#fb7185;
+ --accent-soft:#203b5e;--accent-border:#355b85;--input-bg:#101f33;--input-border:#355579;
+ --sidebar-bg:#0b1627;--dialog-bg:#14243a;--avatar-start:#60a5fa;--avatar-end:#1d4ed8;
+ --accent-contrast:#fff;--accent-hover:#2563eb;--welcome-start:#193b67;--welcome-end:#102743;
+}
+:root[data-alges-theme="blue"] .welcome{background:linear-gradient(120deg,#173d6c,#10233d);border:1px solid #315985}
+:root[data-alges-theme="blue"] .stats article,
+:root[data-alges-theme="blue"] .event-card,
+:root[data-alges-theme="blue"] .task-card,
+:root[data-alges-theme="blue"] .class-card,
+:root[data-alges-theme="blue"] .panel,
+:root[data-alges-theme="blue"] .group-row,
+:root[data-alges-theme="blue"] .student-row{box-shadow:inset 0 1px rgba(255,255,255,.035)}
+:root[data-alges-theme="blue"] .primary{color:#fff}
+:root[data-alges-theme="blue"] dialog::backdrop{background:rgba(3,10,22,.78);backdrop-filter:none}
+
+:root[data-alges-theme="amber"]{
+ --bg:#f7f2e8;--panel:#fffdf8;--panel2:#f2eadb;--line:#e5d8c2;--text:#403526;--muted:#85765f;
+ --gold:#b7791f;--blue:#d6b477;--green:#8a9b63;--red:#bd5b50;
+ --accent-soft:#f3e8d2;--accent-border:#dfc99f;--input-bg:#fffdf8;--input-border:#dfd0b5;
+ --sidebar-bg:#fffaf0;--dialog-bg:#fffdf8;--avatar-start:#e9cf91;--avatar-end:#bd8737;
+ --accent-contrast:#fff;--accent-hover:#986015;--welcome-start:#f3e8d2;--welcome-end:#eee0c4;
+}
+:root[data-alges-theme="amber"] .welcome{background:linear-gradient(120deg,#f3e8d2,#eee0c4);border:1px solid #dfc99f}
+:root[data-alges-theme="amber"] .welcome h2{color:#514025}
+:root[data-alges-theme="amber"] .stats article,
+:root[data-alges-theme="amber"] .event-card,
+:root[data-alges-theme="amber"] .task-card,
+:root[data-alges-theme="amber"] .class-card,
+:root[data-alges-theme="amber"] .panel,
+:root[data-alges-theme="amber"] .group-row,
+:root[data-alges-theme="amber"] .student-row{box-shadow:0 2px 7px rgba(105,78,35,.045)}
+:root[data-alges-theme="amber"] .primary{color:#fff}
+:root[data-alges-theme="amber"] dialog::backdrop{background:rgba(54,42,24,.35);backdrop-filter:none}
+
+:root[data-alges-theme="purple"]{
+ --bg:#f6f3fb;--panel:#ffffff;--panel2:#f0eafb;--line:#e2d9f0;--text:#302641;--muted:#817493;
+ --gold:#8054c7;--blue:#b69add;--green:#9670ce;--red:#c45e7b;
+ --accent-soft:#eee7f8;--accent-border:#d8c9ed;--input-bg:#fff;--input-border:#d9cdea;
+ --sidebar-bg:#fcfaff;--dialog-bg:#fff;--avatar-start:#d9c8f2;--avatar-end:#9b78cf;
+ --accent-contrast:#fff;--accent-hover:#6d43b1;--welcome-start:#eee7f8;--welcome-end:#e7def4;
+}
+:root[data-alges-theme="purple"] .welcome{background:linear-gradient(120deg,#eee7f8,#e7def4);border:1px solid #d8c9ed}
+:root[data-alges-theme="purple"] .welcome h2{color:#493568}
+:root[data-alges-theme="purple"] .stats article,
+:root[data-alges-theme="purple"] .event-card,
+:root[data-alges-theme="purple"] .task-card,
+:root[data-alges-theme="purple"] .class-card,
+:root[data-alges-theme="purple"] .panel,
+:root[data-alges-theme="purple"] .group-row,
+:root[data-alges-theme="purple"] .student-row{box-shadow:0 2px 8px rgba(82,57,121,.045)}
+:root[data-alges-theme="purple"] .primary{color:#fff}
+:root[data-alges-theme="purple"] dialog::backdrop{background:rgba(38,27,55,.32);backdrop-filter:none}
+
+/* Acabamento comum: superfícies nítidas, sem vidro ou desfoque */
+:root[data-alges-theme="blue"] .sidebar,
+:root[data-alges-theme="amber"] .sidebar,
+:root[data-alges-theme="purple"] .sidebar{border-right:1px solid var(--line)}
+:root[data-alges-theme="blue"] .event-menu-options,
+:root[data-alges-theme="blue"] .profile-menu,
+:root[data-alges-theme="amber"] .event-menu-options,
+:root[data-alges-theme="amber"] .profile-menu,
+:root[data-alges-theme="purple"] .event-menu-options,
+:root[data-alges-theme="purple"] .profile-menu{box-shadow:0 5px 16px rgba(25,35,45,.10)}
+:root[data-alges-theme="blue"] dialog::backdrop,
+:root[data-alges-theme="amber"] dialog::backdrop,
+:root[data-alges-theme="purple"] dialog::backdrop{backdrop-filter:none}
