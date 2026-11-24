@@ -77,3 +77,68 @@ input,textarea,select{background:var(--input-bg);border-color:var(--input-border
 .profile-lock-screen{background:var(--bg)}
 .profile-appearance{border-top:1px solid var(--line);margin-top:18px;padding-top:14px}
 .profile-appearance h3{font:700 15px Manrope;margin:0 0 6px}
+
+
+/* ALGES — tema claro: branco e verde suave */
+:root[data-alges-theme="emerald"]{
+ --bg:#f4f8f5;--panel:#ffffff;--panel2:#edf5ef;--line:#dce8df;--text:#24352b;--muted:#718276;
+ --gold:#16845b;--blue:#8dbda0;--green:#26966a;--red:#c85d5d;
+ --accent-soft:#e5f1e8;--accent-border:#c9dfcf;
+ --input-bg:#ffffff;--input-border:#cbdccf;--sidebar-bg:#ffffff;--dialog-bg:#ffffff;
+ --avatar-start:#b9dfc4;--avatar-end:#75b98c;--accent-contrast:#173b28;--accent-hover:#1b9668;
+ --welcome-start:#e8f3eb;--welcome-end:#e8f3eb;
+}
+:root[data-alges-theme="emerald"] body{background:var(--bg);color:var(--text)}
+:root[data-alges-theme="emerald"] .sidebar{background:#fff;border-color:var(--line)}
+:root[data-alges-theme="emerald"] .welcome{background:#e8f3eb;border:1px solid #d4e7d9}
+:root[data-alges-theme="emerald"] .welcome h2{color:#244b34}
+:root[data-alges-theme="emerald"] .welcome .muted{color:#627969}
+:root[data-alges-theme="emerald"] .date-chip{background:#fff;border-color:var(--line);color:#16764f}
+:root[data-alges-theme="emerald"] .secondary,
+:root[data-alges-theme="emerald"] .icon-btn,
+:root[data-alges-theme="emerald"] .event-complete{background:#edf5ef;color:#315640;border:1px solid #d6e5da}
+:root[data-alges-theme="emerald"] .nav.active,
+:root[data-alges-theme="emerald"] .nav:hover,
+:root[data-alges-theme="emerald"] .event-menu-options button:hover,
+:root[data-alges-theme="emerald"] .profile-menu button:hover{background:#e8f3eb;color:#176b49}
+:root[data-alges-theme="emerald"] .primary{background:#16845b;color:#fff}
+:root[data-alges-theme="emerald"] .primary:hover{background:#116f4b}
+:root[data-alges-theme="emerald"] .pill{background:#e5f3e9;color:#286b45}
+:root[data-alges-theme="emerald"] .bar-track{background:#e8eee9}
+:root[data-alges-theme="emerald"] .finance-eye{background:#f7faf7;color:#607568}
+:root[data-alges-theme="emerald"] dialog{background:#fff;border-color:#d5e4d9;color:#24352b}
+:root[data-alges-theme="emerald"] dialog::backdrop{background:rgba(28,49,35,.35);backdrop-filter:none}
+:root[data-alges-theme="emerald"] input,
+:root[data-alges-theme="emerald"] textarea,
+:root[data-alges-theme="emerald"] select{background:#fff;border-color:#cbdccf;color:#24352b}
+:root[data-alges-theme="emerald"] label{color:#506557}
+:root[data-alges-theme="emerald"] .event-menu-options,
+:root[data-alges-theme="emerald"] .profile-menu{background:#fff;border-color:#dce8df;box-shadow:0 4px 14px rgba(32,65,43,.08)}
+:root[data-alges-theme="emerald"] .toast{background:#e8f3eb;border-color:#c9dfcf;color:#244b34}
+:root[data-alges-theme="emerald"] .profile-lock-screen{background:#f4f8f5}
+:root[data-alges-theme="emerald"] .profile-lock-card{background:#fff;border-color:#dce8df}
+:root[data-alges-theme="emerald"] .profile-lock-card h2{color:#24352b}
+:root[data-alges-theme="emerald"] .profile-lock-card>small{color:#718276}
+:root[data-alges-theme="emerald"] .brand-mark,
+:root[data-alges-theme="emerald"] .profile-avatar{background:#cce8d3;color:#245438}
+:root[data-alges-theme="emerald"] .event-menu-options button{color:#24352b}
+:root[data-alges-theme="emerald"] .danger{background:#fbeaea;color:#a33f3f;border:1px solid #f0d0d0}
+:root[data-alges-theme="emerald"] .reversal-done{color:#b34b4b}
+:root[data-alges-theme="emerald"] .profile-remove-pin{color:#b34b4b}
+:root[data-alges-theme="emerald"] .profile-error{color:#b34b4b}
+:root[data-alges-theme="emerald"] .day.selected{background:#e5f1e8}
+:root[data-alges-theme="emerald"] .day.today{box-shadow:inset 0 0 0 1px #8dbda0}
+:root[data-alges-theme="emerald"] .event-menu-options{box-shadow:0 4px 14px rgba(32,65,43,.08)}
+:root[data-alges-theme="emerald"] .profile-lock-card,
+:root[data-alges-theme="emerald"] .welcome,
+:root[data-alges-theme="emerald"] .stats article,
+:root[data-alges-theme="emerald"] .event-card,
+:root[data-alges-theme="emerald"] .task-card,
+:root[data-alges-theme="emerald"] .class-card,
+:root[data-alges-theme="emerald"] .panel,
+:root[data-alges-theme="emerald"] .group-row,
+:root[data-alges-theme="emerald"] .student-row,
+:root[data-alges-theme="emerald"] .detail-split{box-shadow:none}
+:root[data-alges-theme="emerald"] .brand-mark,
+:root[data-alges-theme="emerald"] .profile-avatar,
+:root[data-alges-theme="emerald"] .welcome{background-image:none}
